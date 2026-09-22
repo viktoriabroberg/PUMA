@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "expo": "^57.0.24"
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "latest"
   }
 }
