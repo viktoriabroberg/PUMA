@@ -8,7 +8,11 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.viktoriabroberg.pumaapp"
+      "bundleIdentifier": "com.viktoriabroberg.pumaapp",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Vi använder din position för att visa din plats på kartan."
+      }
+
     },
     "android": {
       "adaptiveIcon": {
