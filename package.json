@@ -2,6 +2,11 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^3.1.1",
     "@supabase/supabase-js": "^2.117.1",
-    "expo": "^57.0.24"
+    "expo": "^57.0.24",
+    "react-native-geolocation-service": "^5.3.1",
+    "react-native-maps": "^1.29.8"
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "latest"
   }
 }
