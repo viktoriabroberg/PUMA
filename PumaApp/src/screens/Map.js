@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { StyleSheet, View } from 'react-native';
+//import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Map() {
   //const [state, setState] = useState(null);
@@ -45,7 +46,7 @@ export default function Map() {
   return (
     <View style={styles.container}>
       <MapView
-        style={styles.map}
+        style={StyleSheet.absoluteFill}
         //Kartan utgår från dessa innan användaren godkänner platsinfo
         initialRegion={{
           latitude: 63.820556,
@@ -65,6 +66,11 @@ export default function Map() {
           description="Här är du!"
         />)}
       </MapView>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/map/createPlace')}>
+        <Text style={styles.buttonText}>Lägg till plats</Text>
+      </TouchableOpacity>
     </View>
   );
 }
