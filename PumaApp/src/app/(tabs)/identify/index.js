@@ -1,28 +1,58 @@
 import { useState } from "react";
-import { View, Text, Button, ActivityIndicator, ScrollView, StyleSheet } from "react-native";
+import { View, Text, Pressable, ActivityIndicator, ScrollView, StyleSheet } from "react-native";
 import { identify } from "../../../../lib/gemini";
 
-// Maps Gemini's English confidence values to Swedish labels and colors
-const CONFIDENCE_LABELS = {
-	high: { text: "Hög säkerhet", color: "#2e7d32" },
-	medium: { text: "Medel säkerhet", color: "#ef6c00" },
-	low: { text: "Låg säkerhet", color: "#757575" },
+const COLORS = {
+	background: "#F5F5F7",
+	card: "#FFFFFF",
+	label: "#000000",
+	secondaryLabel: "#6E6E73",
+	separator: "#C6C6C8",
+	green: "#0E7C1C",
+	red: "#FF3B30",
 };
 
-function SuggestionCard({ suggestion, isTopMatch })
+const CONFIDENCE_LABELS = {
+	high: { text: "Hög säkerhet", textColor: "#248A3D", background: "#34C75926" },
+	medium: { text: "Medel säkerhet", textColor: "#C93400", background: "#FF950026" },
+	low: { text: "Låg säkerhet", textColor: "#6E6E73", background: "#8E8E9326" },
+};
+
+function ActionButton({ title, onPress, disabled, variant = "filled" })
 {
-	const confidence = CONFIDENCE_LABELS[suggestion.confidence] ?? CONFIDENCE_LABELS.low;
+	const isFilled = variant === "filled";
 
 	return (
-		<View style={[styles.card, isTopMatch && styles.topCard]}>
-			{isTopMatch && <Text style={styles.topLabel}>Mest troligt</Text>}
-			<Text style={styles.swedishName}>{suggestion.swedishName}</Text>
-			<Text style={styles.scientificName}>{suggestion.scientificName}</Text>
-			<View style={[styles.badge, { backgroundColor: confidence.color }]}>
-				<Text style={styles.badgeText}>{confidence.text}</Text>
-			</View>
+		<Pressable
+			onPress={onPress}
+			disabled={disabled}
+			style={({ pressed }) => [
+				styles.button,
+				isFilled ? styles.buttonFilled : styles.buttonTinted,
+				(pressed || disabled) && styles.buttonDimmed,
+			]}
+		>
+			<Text style={[styles.buttonText, isFilled ? styles.buttonTextFilled : styles.buttonTextTinted]}>
+				{title}
+			</Text>
+		</Pressable>
+	);
+}
+
+function ConfidenceBadge({ value })
+{
+	const confidence = CONFIDENCE_LABELS[value] ?? CONFIDENCE_LABELS.low;
+
+	return (
+		<View style={[styles.badge, { backgroundColor: confidence.background }]}>
+			<Text style={[styles.badgeText, { color: confidence.textColor }]}>{confidence.text}</Text>
 		</View>
 	);
+}
+
+function SectionHeader({ title })
+{
+	return <Text style={styles.sectionHeader}>{title}</Text>;
 }
 
 function ResultView({ result })
@@ -30,33 +60,63 @@ function ResultView({ result })
 	if (!result.found)
 	{
 		return (
-			<View style={styles.card}>
-				<Text>Ingen svamp eller bär hittades på bilden. Prova att ta en tydligare bild närmare objektet.</Text>
+			<View style={[styles.card, styles.spacedCard]}>
+				<Text style={styles.cardTitle}>Ingen svamp eller bär hittades</Text>
+				<Text style={styles.bodySecondary}>Prova att ta en tydligare bild närmare objektet.</Text>
 			</View>
 		);
 	}
 
 	const suggestions = result.suggestions ?? [];
+	const topMatch = suggestions[0];
+	const otherSuggestions = suggestions.slice(1);
 	const lookalikes = (result.poisonousLookalikes ?? []).filter((name) => name.trim() !== "");
 
 	return (
-		<View style={styles.resultContainer}>
-			{suggestions.map((suggestion, index) => (
-				<SuggestionCard key={index} suggestion={suggestion} isTopMatch={index === 0} />
-			))}
-
-			{lookalikes.length > 0 && (
-				<View style={styles.warningBox}>
-					<Text style={styles.warningTitle}>⚠️ Kan förväxlas med giftiga arter</Text>
-					{lookalikes.map((name, index) => (
-						<Text key={index} style={styles.warningText}>• {name}</Text>
-					))}
-				</View>
+		<View>
+			{topMatch && (
+				<>
+					<SectionHeader title="Mest troligt" />
+					<View style={styles.card}>
+						<Text style={styles.topName}>{topMatch.swedishName}</Text>
+						<Text style={styles.scientificName}>{topMatch.scientificName}</Text>
+						<View style={styles.badgeRow}>
+							<ConfidenceBadge value={topMatch.confidence} />
+						</View>
+						{result.comment ? <Text style={styles.comment}>{result.comment}</Text> : null}
+					</View>
+				</>
 			)}
 
-			{result.comment ? <Text style={styles.comment}>{result.comment}</Text> : null}
+			{otherSuggestions.length > 0 && (
+				<>
+					<SectionHeader title="Andra resultat" />
+					<View style={styles.groupedList}>
+						{otherSuggestions.map((suggestion, index) => (
+							<View key={index} style={[styles.row, index > 0 && styles.rowSeparator]}>
+								<View style={styles.rowText}>
+									<Text style={styles.rowTitle}>{suggestion.swedishName}</Text>
+									<Text style={styles.rowSubtitle}>{suggestion.scientificName}</Text>
+								</View>
+								<ConfidenceBadge value={suggestion.confidence} />
+							</View>
+						))}
+					</View>
+				</>
+			)}
 
-			<Text style={styles.disclaimer}>
+			{lookalikes.length > 0 && (
+				<>
+					<SectionHeader title="Kan förväxlas med giftiga arter" />
+					<View style={styles.warningCard}>
+						{lookalikes.map((name, index) => (
+							<Text key={index} style={styles.warningText}>• {name}</Text>
+						))}
+					</View>
+				</>
+			)}
+
+			<Text style={styles.footnote}>
 				Ät aldrig svamp eller bär enbart utifrån appens förslag. Kontrollera alltid med en kunnig person eller en svampbok.
 			</Text>
 		</View>
@@ -98,15 +158,27 @@ export default function IdentifyScreen()
 	}
 
 	return (
-		<ScrollView contentContainerStyle={styles.container}>
-			<Text style={styles.title}>Identifiera</Text>
+		<ScrollView style={styles.screen} contentContainerStyle={styles.container}>
+			<Text style={styles.largeTitle}>Identifiera</Text>
+			<Text style={styles.subtitle}>Fotografera eller välj en bild på en svamp eller ett bär.</Text>
 
-			<Button title="Ta foto" onPress={() => handleIdentify("camera")} disabled={loading} />
-			<Button title="Välj från bibliotek" onPress={() => handleIdentify("library")} disabled={loading} />
+			<View style={styles.buttonGroup}>
+				<ActionButton title="Ta foto" onPress={() => handleIdentify("camera")} disabled={loading} />
+				<ActionButton title="Välj från bibliotek" variant="tinted" onPress={() => handleIdentify("library")} disabled={loading} />
+			</View>
 
-			{loading && <ActivityIndicator size="large" style={styles.spacing} />}
+			{loading && (
+				<View style={[styles.card, styles.spacedCard, styles.loadingCard]}>
+					<ActivityIndicator />
+					<Text style={styles.bodySecondary}>Analyserar bilden…</Text>
+				</View>
+			)}
 
-			{error && <Text style={styles.error}>{error}</Text>}
+			{error && (
+				<View style={[styles.card, styles.spacedCard]}>
+					<Text style={styles.errorText}>{error}</Text>
+				</View>
+			)}
 
 			{result && <ResultView result={result} />}
 		</ScrollView>
@@ -114,24 +186,57 @@ export default function IdentifyScreen()
 }
 
 const styles = StyleSheet.create({
-	container: { padding: 20, gap: 12 },
-	title: { fontSize: 24, fontWeight: "bold" },
-	spacing: { marginTop: 20 },
-	error: { color: "red", marginTop: 20 },
+	screen: { flex: 1, backgroundColor: COLORS.background },
+	container: { padding: 16, paddingBottom: 40 },
 
-	resultContainer: { gap: 12, marginTop: 8 },
-	card: { padding: 16, borderRadius: 12, backgroundColor: "#f5f5f5" },
-	topCard: { borderWidth: 2, borderColor: "#2e7d32" },
-	topLabel: { fontSize: 12, fontWeight: "bold", color: "#2e7d32", textTransform: "uppercase", marginBottom: 4 },
-	swedishName: { fontSize: 20, fontWeight: "bold" },
-	scientificName: { fontStyle: "italic", color: "#555", marginBottom: 8 },
-	badge: { alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-	badgeText: { color: "white", fontSize: 12, fontWeight: "bold" },
+	largeTitle: { fontSize: 34, fontWeight: "700", letterSpacing: 0.4, color: COLORS.label, marginTop: 8 },
+	subtitle: { fontSize: 15, color: COLORS.secondaryLabel, marginTop: 4, marginBottom: 20 },
 
-	warningBox: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: "#c62828", backgroundColor: "#fdecea" },
-	warningTitle: { fontWeight: "bold", color: "#c62828", marginBottom: 6 },
-	warningText: { color: "#c62828" },
+	buttonGroup: { gap: 10 },
+	button: { height: 50, borderRadius: 12, justifyContent: "center", alignItems: "center" },
+	buttonFilled: { backgroundColor: COLORS.green },
+	buttonTinted: { backgroundColor: "#FFFFFF"},
+	buttonDimmed: { opacity: 0.6 },
+	buttonText: { fontSize: 17, fontWeight: "600" },
+	buttonTextFilled: { color: "white" },
+	buttonTextTinted: { color: COLORS.green },
 
-	comment: { fontSize: 14, color: "#333" },
-	disclaimer: { fontSize: 12, color: "#777", fontStyle: "italic" },
+	sectionHeader: {
+		fontSize: 13,
+		color: COLORS.secondaryLabel,
+		textTransform: "uppercase",
+		marginTop: 28,
+		marginBottom: 6,
+		marginLeft: 16,
+	},
+
+	card: { backgroundColor: COLORS.card, borderRadius: 12, padding: 16 },
+	spacedCard: { marginTop: 20 },
+	loadingCard: { flexDirection: "row", alignItems: "center", gap: 12 },
+	cardTitle: { fontSize: 17, fontWeight: "600", color: COLORS.label, marginBottom: 4 },
+	bodySecondary: { fontSize: 15, color: COLORS.secondaryLabel },
+	errorText: { fontSize: 15, color: COLORS.red },
+
+	topName: { fontSize: 28, fontWeight: "700", color: COLORS.label },
+	scientificName: { fontSize: 15, fontStyle: "italic", color: COLORS.secondaryLabel, marginTop: 2, marginBottom: 12 },
+	comment: { fontSize: 15, color: COLORS.label, lineHeight: 21, marginTop: 14 },
+
+	badgeRow: { flexDirection: "row" },
+	badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+	badgeText: { fontSize: 13, fontWeight: "600" },
+
+	groupedList: { backgroundColor: COLORS.card, borderRadius: 12, overflow: "hidden" },
+	groupedList: { backgroundColor: COLORS.card, borderRadius: 12, boxShadow: "0px 0px 32px 0px rgba(0, 0, 0, 0.2)" },
+	row: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 16, gap: 12 },
+	rowSeparator: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.separator },
+	rowText: { flex: 1 },
+	rowTitle: { fontSize: 17, color: COLORS.label },
+	rowSubtitle: { fontSize: 13, fontStyle: "italic", color: COLORS.secondaryLabel, marginTop: 2 },
+	card: { backgroundColor: COLORS.card, borderRadius: 12, padding: 16, boxShadow: "0px 0px 32px 0px rgba(0, 0, 0, 0.2)" },
+
+	warningCard: { backgroundColor: "#FF3B301A", borderRadius: 12, padding: 16, gap: 4 },
+	warningText: { fontSize: 15, color: "#D70015" },
+	warningCard: { backgroundColor: "#FF3B301A", borderRadius: 12, padding: 16, gap: 4, boxShadow: "0px 0px 32px 0px rgba(0, 0, 0, 0.2)" },
+
+	footnote: { fontSize: 13, color: COLORS.secondaryLabel, lineHeight: 18, marginTop: 24, marginHorizontal: 16 },
 });
