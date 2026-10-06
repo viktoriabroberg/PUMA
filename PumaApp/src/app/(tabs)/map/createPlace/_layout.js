@@ -1,7 +1,14 @@
-import { Stack} from 'expo-router';
+import { Stack } from 'expo-router';
 
-export default function CreatePlaceLayout(){
-    return (
-        <Stack/>
-    );
+export default function CreatePlaceLayout() {
+  return (
+    <Stack>
+      <Stack.Screen
+        name="index"
+        options={{ title: 'Lägg till plats', headerBackTitle: 'Karta' }}
+      />
+       
+      
+    </Stack>
+  );
 }

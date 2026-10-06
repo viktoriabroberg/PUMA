@@ -3,9 +3,14 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 //import { StyleSheet, View } from 'react-native';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Host, Button } from '@expo/ui/swift-ui';
+import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
+import { Column } from '@expo/ui';
+import { useRouter } from 'expo-router';
 
 export default function Map() {
   //const [state, setState] = useState(null);
+  const router = useRouter();
   const [location, setLocation] = useState(null);
     useEffect(() => {
     async function getLocation() {
@@ -66,11 +71,28 @@ export default function Map() {
           description="Här är du!"
         />)}
       </MapView>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push('/map/createPlace')}>
-        <Text style={styles.buttonText}>Lägg till plats</Text>
-      </TouchableOpacity>
+      <View 
+        pointerEvents="box-none"
+        style={{
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingBottom: 115,
+      }}
+      >
+        <Host matchContents>
+          <Button
+            label="Lägg till plats"
+            onPress={() => router.push('/map/createPlace')}
+            modifiers={[buttonStyle('bordered'), controlSize('large')]}
+          />
+        </Host>
+      </View>
+
     </View>
   );
 }
@@ -82,5 +104,11 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '100%',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',   // trycker ner knappen mot botten
+    alignItems: 'center',         // centrerar horisontellt
+    paddingBottom: 24,            // litet luftrum över tab-baren
   },
 });

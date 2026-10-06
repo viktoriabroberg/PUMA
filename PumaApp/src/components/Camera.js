@@ -1,10 +1,19 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Host, Button} from '@expo/ui/swift-ui';
+import { buttonStyle, controlSize, buttonBorderShape } from '@expo/ui/swift-ui/modifiers';
+
 
 export default function App() {
-  const [facing, setFacing] = useState<CameraType>('back');
+
+  const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
+
+  const takePicture = async () => {
+  const photo = await ref.current?.takePictureAsync();
+  if (photo?.uri) setUri(photo.uri);
+  };
 
   if (!permission) {
     // Väntar på tillåtelse till kamera.
@@ -15,8 +24,9 @@ export default function App() {
     //Om tillåtels till kamera inte ges.
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission} title="grant permission" />
+        <Host>
+            <Button onPress={requestPermission} title="grant permission" />
+        </Host>
       </View>
     );
   }
@@ -25,15 +35,30 @@ export default function App() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
+
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} />
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-          <Text style={styles.text}>Flip Camera</Text>
-        </TouchableOpacity>
+        <Host matchContents>
+            <Button
+            label="Vänd kamera"
+            onPress={toggleCameraFacing}
+            //shape={Shape.Circle()}
+            modifiers={[buttonStyle('bordered'), controlSize('large'), buttonBorderShape('circle')]}
+            />
+        </Host>
+          <Host matchContents>
+            <Button
+            label="Ta bild"
+            onPress={takePicture}
+            //shape={Shape.Circle()}
+            modifiers={[buttonStyle('bordered'), controlSize('large'), buttonBorderShape('circle')]}
+            />
+        </Host>
       </View>
     </View>
+    
   );
 }
 
@@ -49,21 +74,15 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
+  label: {
+
+  },
   buttonContainer: {
     position: 'absolute',
     bottom: 64,
     flexDirection: 'row',
-    backgroundColor: 'transparent',
     width: '100%',
-    paddingHorizontal: 64,
+    paddingHorizontal: 250,
   },
-  button: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
+
 });
