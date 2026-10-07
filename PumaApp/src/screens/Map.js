@@ -1,47 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-//import { StyleSheet, View } from 'react-native';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Host, Button } from '@expo/ui/swift-ui';
 import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
-import { Column } from '@expo/ui';
 import { useRouter } from 'expo-router';
+import { getCurrentLocation } from '../services/GpsService';
+import { watchLocation } from '../services/GpsService';
 
 export default function Map() {
   //const [state, setState] = useState(null);
   const router = useRouter();
   const [location, setLocation] = useState(null);
     useEffect(() => {
-    async function getLocation() {
-      const { status } =
-        await Location.requestForegroundPermissionsAsync();
-
-      if (status !== 'granted') {
-        console.log('GPS-behörighet nekades');
-        return;
+    let subscription;
+    async function trackLockation() {
+      //Hämta plats en gågn
+      const currentLocation = await getCurrentLocation();
+      if (currentLocation) {
+        setLocation(currentLocation);
       }
 
-      const currentLocation = await Location.getCurrentPositionAsync({});
       //Prenumerera på aktuell position för att uppdatera om användaren rör sig
-      //Tar in två argument, gps inställningar samt funktion som körs när det uppdateras
-      const subscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High
-        },
-        //Funktionen som uppdaterass
-         (currentLocation) =>{setLocation({
-          latitude: currentLocation.coords.latitude,
-          longitude: currentLocation.coords.longitude,
-        })}
-      );
-     /* setLocation({
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
-      });*/
+      const subscription = await watchLocation((newLocation) => {
+        setLocation(newLocation);
+      });
+
     }
 
-    getLocation();
+    trackLockation();
     //Avsluta prenumeration
    /* if(subscription){
       subscription.remove();
