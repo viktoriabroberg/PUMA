@@ -1,5 +1,6 @@
 import { Redirect } from 'expo-router';
 
 export default function Index(){
-    return <Redirect href = "/map" />;
+    // TODO: Skicka till "/map" direkt om användaren redan är inloggad.
+    return <Redirect href = "/welcome" />;
 }
