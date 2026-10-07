@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView, ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, ActivityIndicator, Pressable, StyleSheet, Platform, Linking, Alert, } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getLocationById } from '../services/PlaceService';
@@ -9,6 +9,21 @@ const AMOUNT_LABELS = {
   2: 'Måttligt',
   3: 'Rikligt',
 };
+
+function openDirections(lat, lng, label) {
+  const name = encodeURIComponent(label ?? 'Plats');
+  const url = Platform.select({
+    ios: `maps://?daddr=${lat},${lng}&q=${name}&dirflg=w`,
+    android: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`,
+    default: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+  });
+
+  Linking.openURL(url).catch(() => {
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`).catch(() =>
+      Alert.alert('Kunde inte öppna kartappen')
+    );
+  });
+}
 
 export default function PlaceBanner() {
   const { id } = useLocalSearchParams();
@@ -73,12 +88,10 @@ export default function PlaceBanner() {
         </View>
       </View>
 
-      {/* Vägbeskrivning (gör inget än) */}
+      {/* Vägbeskrivning */}
       <Pressable
         style={styles.directionsButton}
-        onPress={() => {
-          // TODO: vägbeskrivning
-        }}
+        onPress={() => openDirections(place.latitude, place.longitude, place.name)}
       >
         <Ionicons name="navigate-outline" size={20} color="#fff" />
         <Text style={styles.directionsText}>Vägbeskrivning</Text>
