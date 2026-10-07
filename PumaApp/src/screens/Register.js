@@ -11,24 +11,23 @@ const PROVIDERS = [
 	{ key: "outlook", image: require("../../assets/social/outlook.png") },
 ];
 
-export default function Login()
+export default function Register()
 {
 	const router = useRouter();
 
+	const [username, setUsername] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordHidden, setPasswordHidden] = useState(true);
-	const [rememberMe, setRememberMe] = useState(true);
+	const [acceptedTerms, setAcceptedTerms] = useState(true);
 
-	// TODO: Verifiera inloggningen mot databasen (AuthService). Just nu går man direkt vidare.
-	function handleLogin()
+	function handleRegister()
 	{
 		router.replace("/map");
 	}
 
 	return (
 		<SafeAreaView style={styles.screen} edges={["top"]}>
-			{/* Cinzel ritar gemener som kapitäler, därav "SkogsFynd" -> SKOGSFYND med stora S och F. */}
 			<Text style={styles.brandTitle}>SkogsFynd</Text>
 
 			<KeyboardAvoidingView style={styles.sheet} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -37,9 +36,22 @@ export default function Login()
 				</Pressable>
 
 				<ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-					<Text style={styles.title}>Logga in</Text>
+					<Text style={styles.title}>Registrera dig</Text>
 
 					<View style={styles.inputs}>
+						<View style={styles.inputContainer}>
+							<TextInput
+								style={styles.input}
+								value={username}
+								onChangeText={setUsername}
+								placeholder="Användarnamn"
+								placeholderTextColor={COLORS.placeholder}
+								autoCapitalize="none"
+								autoCorrect={false}
+								autoComplete="username"
+								textContentType="username"
+							/>
+						</View>
 						<View style={styles.inputContainer}>
 							<TextInput
 								style={styles.input}
@@ -64,10 +76,8 @@ export default function Login()
 								autoCapitalize="none"
 								autoCorrect={false}
 								secureTextEntry={passwordHidden}
-								autoComplete="current-password"
-								textContentType="password"
-								returnKeyType="go"
-								onSubmitEditing={handleLogin}
+								autoComplete="new-password"
+								textContentType="newPassword"
 							/>
 							<Pressable onPress={() => setPasswordHidden((value) => !value)} hitSlop={8}>
 								<Ionicons name={passwordHidden ? "eye-off-outline" : "eye-outline"} size={22} color={COLORS.placeholder} />
@@ -75,25 +85,20 @@ export default function Login()
 						</View>
 					</View>
 
-					<View style={styles.optionsRow}>
-						<Pressable style={styles.checkboxRow} onPress={() => setRememberMe((value) => !value)} hitSlop={6}>
-							<View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
-								{rememberMe && <Ionicons name="checkmark" size={18} color="white" />}
-							</View>
-							<Text style={styles.checkboxLabel}>Kom ihåg mig</Text>
-						</Pressable>
-						<Pressable hitSlop={6}>
-							<Text style={styles.forgotText}>Glömt lösenord? ↗</Text>
-						</Pressable>
-					</View>
+					<Pressable style={styles.checkboxRow} onPress={() => setAcceptedTerms((value) => !value)} hitSlop={6}>
+						<View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+							{acceptedTerms && <Ionicons name="checkmark" size={18} color="white" />}
+						</View>
+						<Text style={styles.checkboxLabel}>Jag godkänner användarvillkoren</Text>
+					</Pressable>
 
-					<Pressable onPress={handleLogin} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-						<Text style={styles.buttonText}>Logga in</Text>
+					<Pressable onPress={handleRegister} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+						<Text style={styles.buttonText}>Registrera</Text>
 					</Pressable>
 
 					<View style={styles.dividerRow}>
 						<View style={styles.dividerLine} />
-						<Text style={styles.dividerText}>Logga in med</Text>
+						<Text style={styles.dividerText}>Registrera dig med</Text>
 						<View style={styles.dividerLine} />
 					</View>
 
@@ -101,7 +106,7 @@ export default function Login()
 						{PROVIDERS.map((provider) => (
 							<Pressable
 								key={provider.key}
-								onPress={handleLogin}
+								onPress={handleRegister}
 								style={({ pressed }) => [styles.socialButton, pressed && styles.socialButtonPressed]}
 							>
 								<Image source={provider.image} style={styles.socialIcon} resizeMode="contain" />
@@ -110,9 +115,9 @@ export default function Login()
 					</View>
 
 					<Text style={styles.footer}>
-						Inte använt Skogsfynd tidigare?{" "}
+						Har du redan ett konto?{"  "}
+						<Text style={styles.footerLink} onPress={() => router.replace("/login")}>Logga in här</Text>
 					</Text>
-					<Text style={styles.footerLink} onPress={() => router.replace("/register")}>Registrera dig här</Text>
 				</ScrollView>
 			</KeyboardAvoidingView>
 		</SafeAreaView>
@@ -158,8 +163,7 @@ const styles = StyleSheet.create({
 	},
 	input: { flex: 1, fontSize: 18, color: COLORS.label },
 
-	optionsRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 14 },
-	checkboxRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+	checkboxRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 14 },
 	checkbox: {
 		width: 24,
 		height: 24,
@@ -171,7 +175,6 @@ const styles = StyleSheet.create({
 	},
 	checkboxChecked: { backgroundColor: COLORS.blue, borderColor: COLORS.blue },
 	checkboxLabel: { fontSize: 15, color: COLORS.secondaryLabel },
-	forgotText: { fontSize: 15, color: COLORS.blue },
 
 	button: {
 		height: 52,
@@ -202,8 +205,7 @@ const styles = StyleSheet.create({
 	},
 	socialButtonPressed: { opacity: 0.6 },
 	socialIcon: { width: 30, height: 30 },
-	
 
 	footer: { fontSize: 15, color: COLORS.label, textAlign: "center", marginTop: 28 },
-	footerLink: { color: COLORS.brown, textAlign: "center" },
+	footerLink: { color: COLORS.brown },
 });
