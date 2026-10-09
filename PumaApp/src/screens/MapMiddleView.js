@@ -3,7 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { getMyLocationsTemp } from '../services/PlaceService';
-//import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
+import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
 
 export default function MapMiddleView() {
   const { id } = useLocalSearchParams();
@@ -11,7 +11,7 @@ export default function MapMiddleView() {
   const hasOpenedSheet = useRef(false);
 
   useEffect(() => {
-    getMyLocationsTemp()
+    getMyLocations()
       .then(setPlaces)
       .catch((err) => {
         console.log(err);

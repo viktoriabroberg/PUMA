@@ -7,8 +7,8 @@ import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getCurrentLocation } from '../services/GpsService';
 import { watchLocation } from '../services/GpsService';
-import { getMyLocationsTemp } from '../services/PlaceService';
-//import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
+//import { getMyLocationsTemp } from '../services/PlaceService';
+import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
 
 export default function Map() {
   //const [state, setState] = useState(null);
@@ -20,7 +20,7 @@ export default function Map() {
   // så att en nyss tillagd plats syns när man kommer tillbaka till kartan
   useFocusEffect(
     useCallback(() => {
-      getMyLocationsTemp().then(setPlaces).catch(console.log);
+      getMyLocations().then(setPlaces).catch(console.log);
     }, [])
   );
 
