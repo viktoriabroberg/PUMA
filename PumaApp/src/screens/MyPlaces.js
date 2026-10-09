@@ -122,6 +122,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { getMyLocations } from '../services/PlaceService';
 //import { getAllLocationsTemp } from '../services/PlaceService';
 import { getMyLocationsTemp } from '../services/PlaceService';
+import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
+import FilterMenu from '../components/FilterMenu';
 
 // OBS: justera sökvägen om din assets-mapp ligger någon annanstans
 const AMOUNT_INDICATORS = {
@@ -144,6 +146,7 @@ const formatSpecies = (location_species) => {
 
 export default function MyPlaces() {
   const [locations, setLocations] = useState([]);
+  const [filter, setFilter] = useState(DEFAULT_FILTER);
 
   useEffect(() => {
     getMyLocationsTemp().then(setLocations).catch(console.log);
@@ -164,14 +167,9 @@ export default function MyPlaces() {
           />
         </View>
 
-        <Pressable
-          style={styles.filterButton}
-          onPress={() => {
-            // TODO: filtrering
-          }}
-        >
-          <Ionicons name="filter-outline" size={22} color="#000" />
-        </Pressable>
+        <View style={styles.filterButton}>
+          <FilterMenu value={filter} onChange={setFilter} />
+        </View>
       </View>
     </View>
   );
@@ -180,7 +178,7 @@ export default function MyPlaces() {
     <FlatList
       style={styles.list}
       contentContainerStyle={styles.listContent}
-      data={locations}
+      data={filterLocations(locations, filter)}
       keyExtractor={(item) => String(item.location_id)}
       ListHeaderComponent={header}
       renderItem={({ item }) => (
