@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { View, Text, TextInput, Image, Pressable, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { View, Text, TextInput, Image, Pressable, ScrollView, KeyboardAvoidingView, Platform, StyleSheet, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { COLORS } from "../constants/colors";
+import { loginUser } from "../src/services/LogInService";
 
 const PROVIDERS = [
 	{ key: "google", image: require("../../assets/social/google.png") },
@@ -20,11 +21,29 @@ export default function Login()
 	const [passwordHidden, setPasswordHidden] = useState(true);
 	const [rememberMe, setRememberMe] = useState(true);
 
-	// TODO: Verifiera inloggningen mot databasen (AuthService). Just nu går man direkt vidare.
+	
 	function handleLogin()
-	{
+		{
+			async function handleLogin() {
+
+
+		try {
+	
+		const data = await loginUser(email, password);
+
+		console.log("Inloggad användare:", data.user);
+
 		router.replace("/map");
+	} catch (error) {
+		console.log(error);
+
+		Alert.alert(
+		"Kunde inte logga in",
+		error.message
+		);
 	}
+	}
+		}
 
 	return (
 		<SafeAreaView style={styles.screen} edges={["top"]}>
