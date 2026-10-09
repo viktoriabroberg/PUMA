@@ -65,7 +65,8 @@ export default function MyPlaces() {
       renderItem={({ item }) => (
         <Pressable
           style={styles.card}
-          onPress={() => router.push(`/place/${item.location_id}`)}
+          //onPress={() => router.push(`/place/${item.location_id}`)}
+          onPress={() => router.push(`/place/MapMiddleView/${item.location_id}`)}
         >
           {item.picture_url ? (
             <Image source={{ uri: item.picture_url }} style={styles.cardImage} />
