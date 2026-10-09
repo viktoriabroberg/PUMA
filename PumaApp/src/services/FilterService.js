@@ -16,7 +16,7 @@ const getCategoryKeyForType = (type) =>
 
 // Hämtar profile_id för inloggad användare, eller null om ingen är inloggad
 const getCurrentProfileId = async () => {
-  /*const {
+  const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
@@ -37,8 +37,6 @@ const getCurrentProfileId = async () => {
   }
 
   return profile.profile_id;
-  	*/
-	return 1;
 };
 
 export const getAllSpecies = async () => {

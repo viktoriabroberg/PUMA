@@ -1,127 +1,8 @@
-/*import { useEffect, useState } from 'react';
-import { View, Text, Pressable, FlatList, TextInput, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { getMyLocations } from '../services/PlaceService';
-//import { getAllLocationsTemp } from '../services/PlaceService';
-import { getMyLocationsTemp } from '../services/PlaceService';
-import { COLORS } from "../constants/colors";
-
-export default function MyPlaces() {
-  const [locations, setLocations] = useState([]);
-
-  useEffect(() => {
-    getMyLocationsTemp().then(setLocations).catch(console.log);
-  }, []);
-
-  const header = (
-    <View>
-      <Text style={styles.title}>Platser</Text>
-
-      <View style={styles.searchRow}>
-        <View style={styles.searchBox}>
-          <Ionicons name="search" size={20} color="#000" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Sök"
-            placeholderTextColor="#000"
-            // TODO: sökfunktion
-          />
-        </View>
-
-        <Pressable
-          style={styles.filterButton}
-          onPress={() => {
-            // TODO: filtrering
-          }}
-        >
-          <Ionicons name="filter-outline" size={22} color="#000" />
-        </Pressable>
-      </View>
-    </View>
-  );
-
-  return (
-    <FlatList
-      style={styles.list}
-      contentContainerStyle={styles.listContent}
-      data={locations}
-      keyExtractor={(item) => String(item.location_id)}
-      ListHeaderComponent={header}
-      renderItem={({ item }) => (
-        <Pressable
-          style={styles.card}
-          onPress={() => router.push(`/place/${item.location_id}`)}
-        >
-          <Text>{item.name}</Text>
-        </Pressable>
-      )}
-    />
-  );
-}
-
-const styles = StyleSheet.create({
-  list: { backgroundColor: colors.background },
-  listContent: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 40 },
-
-  title: { fontSize: 32, marginTop: 20, marginBottom: 16, marginLeft: 4 },
-
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 32,
-  },
-  searchBox: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    height: 44,
-    paddingHorizontal: 14,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  searchInput: { flex: 1, fontSize: 17 },
-  filterButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-}); */
-
 import { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable, FlatList, TextInput, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getMyLocations } from '../services/PlaceService';
-//import { getAllLocationsTemp } from '../services/PlaceService';
-import { getMyLocationsTemp } from '../services/PlaceService';
 import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
 import FilterMenu from '../components/FilterMenu';
 
@@ -149,7 +30,7 @@ export default function MyPlaces() {
   const [filter, setFilter] = useState(DEFAULT_FILTER);
 
   useEffect(() => {
-    getMyLocationsTemp().then(setLocations).catch(console.log);
+    getMyLocations().then(setLocations).catch(console.log);
   }, []);
 
   const header = (

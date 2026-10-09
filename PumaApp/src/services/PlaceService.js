@@ -82,7 +82,7 @@ export const getLocationById = async (locationId) => {
   return data;
 };
 
-// TILLFÄLLIG, ta bort när inloggningen fungerar
+/* TILLFÄLLIG, ta bort när inloggningen fungerar
 export const getMyLocationsTemp = async () => {
   const { data, error } = await supabase
     .from('location')
@@ -112,3 +112,4 @@ export const getMyLocationsTemp = async () => {
 
   return data;
 };
+*/
