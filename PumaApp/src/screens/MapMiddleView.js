@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { getMyLocationsTemp } from '../services/PlaceService';
 import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
 
 export default function MapMiddleView() {
