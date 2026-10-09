@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { COLORS } from "../constants/colors";
-import { loginUser } from "../src/services/LogInService";
+import { loginUser } from "../services/LogInService";
 
 const PROVIDERS = [
 	{ key: "google", image: require("../../assets/social/google.png") },
