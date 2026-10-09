@@ -22,28 +22,22 @@ export default function Login()
 	const [rememberMe, setRememberMe] = useState(true);
 
 	
-	function handleLogin()
-		{
-			async function handleLogin() {
+	async function handleLogin() {
+  try {
+    const data = await loginUser(email, password);
 
+    console.log("Inloggad användare:", data.user);
 
-		try {
-	
-		const data = await loginUser(email, password);
+    router.replace("/map");
+  } catch (error) {
+    console.log("Fel vid inloggning:", error.message);
 
-		console.log("Inloggad användare:", data.user);
-
-		router.replace("/map");
-	} catch (error) {
-		console.log(error);
-
-		Alert.alert(
-		"Kunde inte logga in",
-		error.message
-		);
-	}
-	}
-		}
+    Alert.alert(
+      "Kunde inte logga in",
+      error.message
+    );
+  }
+}
 
 	return (
 		<SafeAreaView style={styles.screen} edges={["top"]}>
