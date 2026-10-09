@@ -13,7 +13,7 @@ export default function CreatePlace() {
     const placeName = nameState.value.trim();
     const placeNote = noteState.value.trim();
     try{
-        await createPlaceFunction({name: placeName, note: placeNote});
+        await createPlaceFunction({placeName: placeName, note: placeNote});
         router.back();
     }catch(e){
         alert(e.message);
