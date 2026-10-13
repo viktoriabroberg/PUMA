@@ -45,7 +45,7 @@ export default function MapMiddleView() {
     <View style={styles.container}>
       {/* Visar header med tillbaka-knapp ovanpå kartan */}
       <Stack.Screen
-        options={{ headerShown: true, headerTransparent: true, title: '' ,headerBackButtonDisplayMode: 'minimal',}}
+        options={{ headerShown: true, headerTransparent: true, title: '', headerBackButtonDisplayMode: 'minimal', }}
       />
 
       {places === null ? (
