@@ -1,23 +1,41 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { StyleSheet, View } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  Keyboard,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Host, Button } from '@expo/ui/swift-ui';
 import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getCurrentLocation } from '../services/GpsService';
 import { watchLocation } from '../services/GpsService';
-//import { getMyLocationsTemp } from '../services/PlaceService';
-import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
+import { getMyLocations } from '../services/PlaceService';
+import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
+import { searchLocations } from '../services/SearchService';
+import FilterMenu from '../components/FilterMenu';
+
+const BANNER_HEIGHT_RATIO = 0.4;
+const FOCUS_DELTA = 0.01;
 
 export default function Map() {
-  //const [state, setState] = useState(null);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const mapRef = useRef(null);
   const [location, setLocation] = useState(null);
   const [places, setPlaces] = useState([]);
+  const [filter, setFilter] = useState(DEFAULT_FILTER);
+  const [search, setSearch] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
 
   // Hämta användarens platser varje gång skärmen visas,
-  // så att en nyss tillagd plats syns när man kommer tillbaka till kartan
   useFocusEffect(
     useCallback(() => {
       getMyLocations().then(setPlaces).catch(console.log);
@@ -41,12 +59,43 @@ export default function Map() {
     }
 
     trackLockation();
-    
+
   }, []);
+
+  // Endast pins vars arter matchar filtret visas
+  const visiblePlaces = filterLocations(places, filter).filter(
+    (place) => place.latitude != null && place.longitude != null
+  );
+
+  // Förslag visas medan man skriver i sökfältet
+  const suggestions = search.trim() ? searchLocations(visiblePlaces, search) : [];
+  const showSuggestions = searchFocused && search.trim().length > 0;
+
+  // Centrera kartan på platsen och öppna dess PlaceBanner.
+  const selectPlace = (place) => {
+    Keyboard.dismiss();
+    setSearch(place.name);
+    setSearchFocused(false);
+
+    mapRef.current?.animateToRegion(
+      {
+        latitude: Number(place.latitude) - FOCUS_DELTA * (BANNER_HEIGHT_RATIO / 2),
+        longitude: Number(place.longitude),
+        latitudeDelta: FOCUS_DELTA,
+        longitudeDelta: FOCUS_DELTA,
+      },
+      500
+    );
+
+    router.push(`/place/${place.location_id}`);
+  };
+
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={StyleSheet.absoluteFill}
+        onPress={Keyboard.dismiss}
         //Kartan utgår från dessa innan användaren godkänner platsinfo
         initialRegion={{
           latitude: 63.820556,
@@ -66,8 +115,7 @@ export default function Map() {
           description="Här är du!"
         />)}
 
-        {/* Pins för användarens sparade platser */}
-        {places.filter((place) => place.latitude != null && place.longitude != null).map((place) => (
+        {visiblePlaces.map((place) => (
             <Marker
               key={place.location_id}
               coordinate={{
@@ -80,7 +128,66 @@ export default function Map() {
             />
           ))}
       </MapView>
-      <View 
+
+      <View style={[styles.topBar, { top: insets.top + 8 }]} pointerEvents="box-none">
+        <View style={styles.searchRow}>
+          <View style={styles.searchBox}>
+            <Ionicons name="search" size={20} color="#000" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Sök plats"
+              placeholderTextColor="#666"
+              value={search}
+              onChangeText={setSearch}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              onSubmitEditing={() => suggestions[0] && selectPlace(suggestions[0])}
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {search.length > 0 && (
+              <Pressable onPress={() => setSearch('')} hitSlop={10}>
+                <Ionicons name="close-circle" size={20} color="#999" />
+              </Pressable>
+            )}
+          </View>
+
+          <View style={styles.filterButton}>
+            <FilterMenu value={filter} onChange={setFilter} />
+          </View>
+        </View>
+
+        {showSuggestions && (
+          <View style={styles.suggestions}>
+            <ScrollView keyboardShouldPersistTaps="handled">
+              {suggestions.length > 0 ? (
+                suggestions.map((place, index) => (
+                  <Pressable
+                    key={place.location_id}
+                    style={({ pressed }) => [
+                      styles.suggestionRow,
+                      index > 0 && styles.suggestionDivider,
+                      pressed && styles.suggestionPressed,
+                    ]}
+                    onPress={() => selectPlace(place)}
+                  >
+                    <View style={styles.suggestionIcon}>
+                      <Ionicons name="location-sharp" size={18} color="#0C7A1A" />
+                    </View>
+                    <Text style={styles.suggestionName} numberOfLines={1}>
+                      {place.name}
+                    </Text>
+                  </Pressable>
+                ))
+              ) : (
+                <Text style={styles.noResults}>Inga platser matchar sökningen</Text>
+              )}
+            </ScrollView>
+          </View>
+        )}
+      </View>
+
+      <View
         pointerEvents="box-none"
         style={{
         position: 'absolute',
@@ -106,6 +213,14 @@ export default function Map() {
   );
 }
 
+const shadow = {
+  shadowColor: '#000',
+  shadowOpacity: 0.15,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+  elevation: 4,
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -116,8 +231,72 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',   // trycker ner knappen mot botten
-    alignItems: 'center',         // centrerar horisontellt
-    paddingBottom: 24,            // litet luftrum över tab-baren
+    justifyContent: 'flex-end',   
+    alignItems: 'center',         
+    paddingBottom: 24,            
   },
+
+  topBar: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    zIndex: 1,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  searchBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    height: 48,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    ...shadow,
+  },
+  searchInput: { flex: 1, fontSize: 17 },
+  filterButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow,
+  },
+
+  suggestions: {
+    marginTop: 8,
+    maxHeight: 300,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+    ...shadow,
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  suggestionDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#ddd',
+  },
+  suggestionPressed: { backgroundColor: '#f0f0f2' },
+  suggestionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#e6f2e8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  suggestionName: { flex: 1, fontSize: 16 },
+  noResults: { padding: 16, fontSize: 15, color: '#666' },
 });
