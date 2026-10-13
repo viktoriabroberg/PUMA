@@ -19,7 +19,7 @@ export const registerUser = async (email, password, username) => {
     .from('profile')
     .insert({
         auth_user_id: user.id,
-        usernamne: username,
+        name: username,
     });
 
     if (profileError){
