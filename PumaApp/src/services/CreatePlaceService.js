@@ -1,6 +1,9 @@
 import { getCurrentLocation } from './GpsService';
 import { supabase } from '../utils/supabase';
 
+// Namnet på din bucket i Supabase Storage
+const PICTURE_BUCKET = 'place-images';
+
 // Hämtar profile_id för inloggad användare
 async function getCurrentProfileId() {
   const {
@@ -18,6 +21,22 @@ async function getCurrentProfileId() {
   if (profileError) throw profileError;
 
   return profile.profile_id;
+}
+
+// Laddar upp en bild från telefonen till Supabase Storage och returnerar bildens publika URL
+async function uploadPicture(uri, profileId) {
+  const response = await fetch(uri);
+  const arrayBuffer = await response.arrayBuffer();
+
+  const filePath = `${profileId}/${Date.now()}.jpg`;
+
+  const { error } = await supabase.storage
+    .from(PICTURE_BUCKET)
+    .upload(filePath, arrayBuffer, { contentType: 'image/jpeg' });
+  if (error) throw error;
+
+  const { data } = supabase.storage.from(PICTURE_BUCKET).getPublicUrl(filePath);
+  return data.publicUrl;
 }
 
 //Funtion för att hämta arter till UI (gemensamma + användarens egna)
@@ -56,7 +75,7 @@ export async function createPlaceFunction({
   name,
   amount,
   description,
-  picture_url,
+  pictureUri = null,
   speciesIds = [],
   newSpecies = [],
 }) {
@@ -64,6 +83,11 @@ export async function createPlaceFunction({
   if (!location) throw new Error('Kunde inte hämta position');
 
   const profileId = await getCurrentProfileId();
+
+  // Ladda upp bilden först (om det finns någon), så att vi får en URL att spara
+  const picture_url = pictureUri
+    ? await uploadPicture(pictureUri, profileId)
+    : null;
 
   // Skapa platsen
   const { data: place, error: placeError } = await supabase

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useEffect, useState, useRef} from 'react';
+import { Image, View } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Host, Button, Form, TextField,HStack, Section, useNativeState } from '@expo/ui/swift-ui';
 import {buttonStyle,controlSize,scrollContentBackground,background,submitLabel,
 } from '@expo/ui/swift-ui/modifiers';
@@ -7,6 +8,8 @@ import { createPlaceFunction, getSpecies } from '../services/CreatePlaceService'
 
 export default function CreatePlace() {
     const router = useRouter();
+    // Bildens uri skickas hit från kameraskärmen
+    const { photoUri } = useLocalSearchParams();
     const nameState = useNativeState('');
     const noteState = useNativeState('');
     const mushroomState = useNativeState('');
@@ -23,6 +26,11 @@ export default function CreatePlace() {
     //Mängd, sätts av användaren
     const amountOptions = [1, 2, 3];
     const [amount, setAmount] = useState(null);
+
+    //Förhindrar att platsen sparas flera gånger vid snabba tryck
+    const isSavingRef = useRef(false);
+    const [saving, setSaving] = useState(false);
+    
     // Gammal för arter
     //const [species, setSpecies] = useState('');
     const mushrooms = speciesList.filter((s) => s.type ==='Svamp');
@@ -98,92 +106,111 @@ export default function CreatePlace() {
       return;
     }
 
+    //Om en sparning redan pågår, gör ingenting
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
+    setSaving(true);
+
     try {
       await createPlaceFunction({
         name: placeName,
         amount,
         description: placeNote,
-        picture_url: null,
+        pictureUri: photoUri ?? null,
         speciesIds: selectedSpeciesIds,
         newSpecies
       });
-      router.back();
+      router.push('/map');
     } catch (e) {
       alert(e.message);
+      //Låt användaren försöka igen om det blev fel
+      isSavingRef.current = false;
+      setSaving(false);
     }
   }
 
   return (
-    <Host style={{ flex: 1 }}>
-      <Form>
-        <Button
-            label="Ta bild"
-            onPress={() => router.push('/map/createPlace/camera')}
-            modifiers={[buttonStyle('bordered'), controlSize('large')]}
+    <View style={{ flex: 1 }}>
+      {/* Förhandsvisning av tagen bild */}
+      {photoUri ? (
+        <Image
+          source={{ uri: photoUri }}
+          style={{ width: '100%', height: 220 }}
+          resizeMode="cover"
         />
-        <Section title="Namn">
-          <TextField
-            placeholder="Namn på plats"
-            text={nameState}
-            modifiers={[submitLabel('done')]}
-          />
-        </Section>
+      ) : null}
 
-        <Section title="Mängd">
-          {chunk(amountOptions, 3).map((row, i) => (
-            <HStack key={i} spacing={8}>
-              {row.map((a) => (
-                <Button
-                  key={a}
-                  label={String(a)}
-                  onPress={() => selectedAmount(a)}
-                  modifiers={[
-                    buttonStyle(
-                      amount === a ? 'borderedProminent' : 'bordered'
-                    ),
-                    controlSize('large'),
-                  ]}
-                />
-              ))}
-            </HStack>
-          ))}
-        </Section>
-
-        <Section title="Arter">
-          {chunk(speciesList, 3).map((row, i) => (
-            <HStack key={i} spacing={8}>
-              {row.map((s) => (
-                <Button
-                  key={s.species_id}
-                  label={s.name}
-                  onPress={() => toggleSpecies(s.species_id)}
-                  modifiers={[
-                    buttonStyle(
-                      selectedSpeciesIds.includes(s.species_id) ? 'borderedProminent' : 'bordered'
-                    ),
-                    controlSize('large'),
-                  ]}
-                />
-              ))}
-            </HStack>
-          ))}
-        </Section>
-        <Section title="Namn">
-          <TextField
-            placeholder="Anteckningar"
-            text={noteState}
-            modifiers={[submitLabel('done')]}
-          />
-        </Section>
-
-        <Section>
+      <Host style={{ flex: 1 }}>
+        <Form>
           <Button
-            label="Spara"
-            onPress={save}
-            modifiers={[buttonStyle('borderedProminent'), controlSize('large')]}
+              label={photoUri ? 'Ta ny bild' : 'Ta bild'}
+              onPress={() => router.push('/map/createPlace/camera')}
+              modifiers={[buttonStyle('bordered'), controlSize('large')]}
           />
-        </Section>
-      </Form>
-    </Host>
+          <Section title="Namn">
+            <TextField
+              placeholder="Namn på plats"
+              text={nameState}
+              modifiers={[submitLabel('done')]}
+            />
+          </Section>
+
+          <Section title="Mängd">
+            {chunk(amountOptions, 3).map((row, i) => (
+              <HStack key={i} spacing={8}>
+                {row.map((a) => (
+                  <Button
+                    key={a}
+                    label={String(a)}
+                    onPress={() => selectedAmount(a)}
+                    modifiers={[
+                      buttonStyle(
+                        amount === a ? 'borderedProminent' : 'bordered'
+                      ),
+                      controlSize('large'),
+                    ]}
+                  />
+                ))}
+              </HStack>
+            ))}
+          </Section>
+
+          <Section title="Arter">
+            {chunk(speciesList, 3).map((row, i) => (
+              <HStack key={i} spacing={8}>
+                {row.map((s) => (
+                  <Button
+                    key={s.species_id}
+                    label={s.name}
+                    onPress={() => toggleSpecies(s.species_id)}
+                    modifiers={[
+                      buttonStyle(
+                        selectedSpeciesIds.includes(s.species_id) ? 'borderedProminent' : 'bordered'
+                      ),
+                      controlSize('large'),
+                    ]}
+                  />
+                ))}
+              </HStack>
+            ))}
+          </Section>
+          <Section title="Namn">
+            <TextField
+              placeholder="Anteckningar"
+              text={noteState}
+              modifiers={[submitLabel('done')]}
+            />
+          </Section>
+
+          <Section>
+            <Button
+              label="Spara"
+              onPress={save}
+              modifiers={[buttonStyle('borderedProminent'), controlSize('large')]}
+            />
+          </Section>
+        </Form>
+      </Host>
+    </View>
   );
 }
