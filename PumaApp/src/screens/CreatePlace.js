@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { Host, Button, Form, TextField,HStack, Section, useNativeState } from '@expo/ui/swift-ui';
-import {buttonStyle,controlSize,scrollContentBackground,background,submitLabel,
+import { Host, Button, Form, TextField,HStack, Section, useNativeState, VStack } from '@expo/ui/swift-ui';
+import {buttonStyle,controlSize,submitLabel,textFieldStyle, onSubmit 
 } from '@expo/ui/swift-ui/modifiers';
-import { createPlaceFunction, getSpecies } from '../services/CreatePlaceService';
+import { createPlaceFunction, getSpecies, insertNewSpecies} from '../services/CreatePlaceService';
+import { StyleSheet, View } from 'react-native';
 
 export default function CreatePlace() {
     const router = useRouter();
@@ -12,6 +13,8 @@ export default function CreatePlace() {
     const mushroomState = useNativeState('');
     const berryState = useNativeState('');
     const inputSpeciesState = useNativeState('');
+    //const inputMushroomSpeciesState = useNativeState('');
+    //const inputBerrySpeciesState = useNativeState('');
     const [type, setType] = useState('');     
 
     //Lista med alla arter med id osv
@@ -29,6 +32,7 @@ export default function CreatePlace() {
     const berries = speciesList.filter((s) => s.type === 'Bär'); 
 
     // Useeffect som anvädner service och lägger till allt på arttabellen i artlistan
+    //Kolla på att ändra till useFocusEffect
     useEffect(() =>{
         console.log('Valda arter:', selectedSpeciesIds);
             getSpecies()
@@ -51,15 +55,25 @@ export default function CreatePlace() {
     function addNewSpecies(inputSpeciesState,type){
         //Hämta namn från input
         const inputSpecies = inputSpeciesState.value.trim();
+        console.log('addNewSpecies körs med:', inputSpeciesState.value, type);
             //Om namn inte kommit in så retunera
             if(!inputSpecies){return;}
         //Kontrollera så att tillagd art inte läggs till dubbelt
-        const speciesExist = newSpecies.some(
-            (n) => n.type === type && n.name.toLowerCase() === inputSpecies.toLowerCase());
-        //Om art inte finns så lägg till i listan med newSpecies
-        if(!speciesExist){
+         const alreadyExists =
+            newSpecies.some(
+            (s) =>
+                s.type === type &&
+                s.name.toLowerCase() === inputSpecies.toLowerCase()
+            );
+        if (alreadyExists) {
+            alert('Arten finns redan');
+            return;
+        }
+        else{
             setNewSpecies((prev) => [...prev, { name: inputSpecies, type }]);
         }
+        //Om art inte finns så lägg till i listan med newSpecies
+    
         inputSpeciesState.set('');
     }
     //Funktion för att kolla om ny art är tilllagd
@@ -82,10 +96,21 @@ export default function CreatePlace() {
 
     //Kontroll för att namn måste anges
     if (!placeName) {
-      alert('Ge platsen ett namn');
       return;
     }
-    //Kontroll om en ny art är inlaggd
+    
+    if(!(newSpecies.length === 0)){
+
+        try{
+
+            await insertNewSpecies({});
+        }
+        catch(e){
+            alert(e.message)
+        }
+    }
+    console.log('Valda befintliga arter:', selectedSpeciesIds);
+    console.log('Egna arter:', newSpecies);
  
     //Kontroll så att art anges
     if (selectedSpeciesIds.length === 0 && newSpecies.length === 0) {
@@ -114,6 +139,7 @@ export default function CreatePlace() {
   }
 
   return (
+    
     <Host style={{ flex: 1 }}>
       <Form>
         <Button
@@ -131,7 +157,7 @@ export default function CreatePlace() {
 
         <Section title="Mängd">
           {chunk(amountOptions, 3).map((row, i) => (
-            <HStack key={i} spacing={8}>
+            <HStack key={i} spacing={8} >
               {row.map((a) => (
                 <Button
                   key={a}
@@ -149,25 +175,61 @@ export default function CreatePlace() {
           ))}
         </Section>
 
-        <Section title="Arter">
-          {chunk(speciesList, 3).map((row, i) => (
-            <HStack key={i} spacing={8}>
-              {row.map((s) => (
+        <VStack alignment="leading" >
+        {chunk(mushrooms, 3).map((row, i) => (
+            <HStack key={i} spacing={8} >
+            {row.map((s) => (
                 <Button
-                  key={s.species_id}
-                  label={s.name}
-                  onPress={() => toggleSpecies(s.species_id)}
-                  modifiers={[
+                key={s.species_id}
+                label={s.name}
+                onPress={() => toggleSpecies(s.species_id)}
+                modifiers={[
                     buttonStyle(
-                      selectedSpeciesIds.includes(s.species_id) ? 'borderedProminent' : 'bordered'
+                    selectedSpeciesIds.includes(s.species_id)
+                        ? 'borderedProminent'
+                        : 'bordered'
                     ),
                     controlSize('large'),
-                  ]}
+                ]}
                 />
-              ))}
+            ))}
             </HStack>
-          ))}
-        </Section>
+        ))}
+   
+        <TextField
+            placeholder="Ange egen art"
+            text={mushroomState}
+            modifiers={[textFieldStyle('roundedBorder'),submitLabel('done'),onSubmit(() => addNewSpecies(mushroomState, 'Svamp'))]}
+          />
+    
+        {chunk(berries, 3).map((row, i) => (
+            <HStack key={i} spacing={8} >
+            {row.map((s) => (
+                <Button
+                key={s.species_id}
+                label={s.name}
+                onPress={() => toggleSpecies(s.species_id)}
+                modifiers={[
+                    buttonStyle(
+                    selectedSpeciesIds.includes(s.species_id)
+                        ? 'borderedProminent'
+                        : 'bordered'
+                    ),
+                    controlSize('large'),
+                ]}
+                />
+            ))}
+            </HStack>
+        ))}
+        
+        <TextField
+            placeholder="Ange egen art"
+            text={berryState}
+            modifiers={[textFieldStyle('roundedBorder'),submitLabel('done'), onSubmit(() => addNewSpecies(berryState, 'Bär'))]}
+          />
+        </VStack>
+
+
         <Section title="Namn">
           <TextField
             placeholder="Anteckningar"
