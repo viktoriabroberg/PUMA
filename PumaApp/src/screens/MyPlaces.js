@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { View, Text, Image, Pressable, FlatList, TextInput, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getMyLocations } from '../services/PlaceService';
 import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
@@ -29,9 +29,11 @@ export default function MyPlaces() {
   const [locations, setLocations] = useState([]);
   const [filter, setFilter] = useState(DEFAULT_FILTER);
 
-  useEffect(() => {
-    getMyLocations().then(setLocations).catch(console.log);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getMyLocations().then(setLocations).catch(console.log);
+    }, [])
+  );
 
   const header = (
     <View>
