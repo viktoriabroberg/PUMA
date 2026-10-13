@@ -116,6 +116,11 @@ export default function CreatePlace() {
   return (
     <Host style={{ flex: 1 }}>
       <Form>
+        <Button
+            label="Ta bild"
+            onPress={() => router.push('/map/createPlace/camera')}
+            modifiers={[buttonStyle('bordered'), controlSize('large')]}
+        />
         <Section title="Namn">
           <TextField
             placeholder="Namn på plats"
