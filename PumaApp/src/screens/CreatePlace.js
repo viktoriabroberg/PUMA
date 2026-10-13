@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useRef} from 'react';
 import { Image, View } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Host, Button, Form, TextField,HStack, Section, useNativeState, VStack } from '@expo/ui/swift-ui';
-import {buttonStyle,controlSize,scrollContentBackground,background,submitLabel, textFieldStyle, onSubmit
+import {buttonStyle,controlSize,scrollContentBackground,background, submitLabel, textFieldStyle, onSubmit
 } from '@expo/ui/swift-ui/modifiers';
 import { createPlaceFunction, getSpecies, insertNewSpecies} from '../services/CreatePlaceService';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export default function CreatePlace() {
     const router = useRouter();
