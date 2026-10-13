@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getMyLocations } from '../services/PlaceService';
 import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
+import { searchLocations } from '../services/SearchService';
 import FilterMenu from '../components/FilterMenu';
 
 // OBS: justera sökvägen om din assets-mapp ligger någon annanstans
@@ -28,6 +29,7 @@ const formatSpecies = (location_species) => {
 export default function MyPlaces() {
   const [locations, setLocations] = useState([]);
   const [filter, setFilter] = useState(DEFAULT_FILTER);
+  const [search, setSearch] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -46,7 +48,11 @@ export default function MyPlaces() {
             style={styles.searchInput}
             placeholder="Sök"
             placeholderTextColor="#000"
-            // TODO: sökfunktion
+            value={search}
+            onChangeText={setSearch}
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+            returnKeyType="search"
           />
         </View>
 
@@ -61,7 +67,8 @@ export default function MyPlaces() {
     <FlatList
       style={styles.list}
       contentContainerStyle={styles.listContent}
-      data={filterLocations(locations, filter)}
+      data={searchLocations(filterLocations(locations, filter), search)}
+      keyboardShouldPersistTaps="handled"
       keyExtractor={(item) => String(item.location_id)}
       ListHeaderComponent={header}
       renderItem={({ item }) => (
