@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Host, Button, Form, TextField,HStack, Section, useNativeState } from '@expo/ui/swift-ui';
 import {buttonStyle,controlSize,scrollContentBackground,background,submitLabel,
 } from '@expo/ui/swift-ui/modifiers';
-import { createPlaceFunction, getSpecies, insertNewSpecies } from '../services/CreatePlaceService';
+import { createPlaceFunction, getSpecies } from '../services/CreatePlaceService';
 
 export default function CreatePlace() {
     const router = useRouter();
@@ -20,8 +20,9 @@ export default function CreatePlace() {
     const [selectedSpeciesIds, setSelectedSpeciesIds] = useState([]);
     //För egna arter
     const [newSpecies, setNewSpecies] = useState([]);
-    //Mäng, ska sättas av användaren ska inte vara 2 alltid ÄNDRA SEN
-    const [amount, setAmount] = useState([1, 2, 3]);
+    //Mängd, sätts av användaren
+    const amountOptions = [1, 2, 3];
+    const [amount, setAmount] = useState(null);
     // Gammal för arter
     //const [species, setSpecies] = useState('');
     const mushrooms = speciesList.filter((s) => s.type ==='Svamp');
@@ -54,10 +55,10 @@ export default function CreatePlace() {
             if(!inputSpecies){return;}
         //Kontrollera så att tillagd art inte läggs till dubbelt
         const speciesExist = newSpecies.some(
-            (n) => n.type === type && n.inputSpecies.toLowercase() === inputSpecies);
+            (n) => n.type === type && n.name.toLowerCase() === inputSpecies.toLowerCase());
         //Om art inte finns så lägg till i listan med newSpecies
         if(!speciesExist){
-            setNewSpecies({inputSpecies,type});
+            setNewSpecies((prev) => [...prev, { name: inputSpecies, type }]);
         }
         inputSpeciesState.set('');
     }
@@ -87,18 +88,23 @@ export default function CreatePlace() {
     //Kontroll om en ny art är inlaggd
  
     //Kontroll så att art anges
-    if (speciesList.length() === 0 && newSpecies.length() === 0) {
+    if (selectedSpeciesIds.length === 0 && newSpecies.length === 0) {
       alert('Välj minst en art');
+      return;
+    }
+    //Kontroll så att mängd anges
+    if (amount === null) {
+      alert('Välj en mängd');
       return;
     }
 
     try {
       await createPlaceFunction({
         name: placeName,
-        amount: 2,
+        amount,
         description: placeNote,
         picture_url: null,
-        species_id: selectedSpeciesIds,
+        speciesIds: selectedSpeciesIds,
         newSpecies
       });
       router.back();
@@ -114,22 +120,21 @@ export default function CreatePlace() {
           <TextField
             placeholder="Namn på plats"
             text={nameState}
-            onSubmit={createPlaceFunction(placeName)}
             modifiers={[submitLabel('done')]}
           />
         </Section>
 
         <Section title="Mängd">
-          {chunk(amount, 3).map((row, i) => (
+          {chunk(amountOptions, 3).map((row, i) => (
             <HStack key={i} spacing={8}>
               {row.map((a) => (
                 <Button
-                  key={a.amount}
-                  label={a.amount}
-                  onPress={() => selectedAmount(a.amount)}
+                  key={a}
+                  label={String(a)}
+                  onPress={() => selectedAmount(a)}
                   modifiers={[
                     buttonStyle(
-                      selectedSpeciesIds.includes(a.amount) ? 'borderedProminent' : 'bordered'
+                      amount === a ? 'borderedProminent' : 'bordered'
                     ),
                     controlSize('large'),
                   ]}
@@ -162,7 +167,6 @@ export default function CreatePlace() {
           <TextField
             placeholder="Anteckningar"
             text={noteState}
-            onSubmit = {createPlaceFunction(placeName)}
             modifiers={[submitLabel('done')]}
           />
         </Section>
