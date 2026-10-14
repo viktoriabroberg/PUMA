@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Host, Button, Form, TextField,HStack, Section, useNativeState, VStack } from '@expo/ui/swift-ui';
 import {buttonStyle,controlSize,scrollContentBackground,background, submitLabel, textFieldStyle, onSubmit
 } from '@expo/ui/swift-ui/modifiers';
-import { createPlaceFunction, getSpecies, insertNewSpecies} from '../services/CreatePlaceService';
+import { createPlaceFunction, getSpecies} from '../services/CreatePlaceService';
 import { StyleSheet } from 'react-native';
 
 export default function CreatePlace() {
@@ -107,16 +107,6 @@ export default function CreatePlace() {
       return;
     }
     
-    if(!(newSpecies.length === 0)){
-
-        try{
-
-            await insertNewSpecies({});
-        }
-        catch(e){
-            alert(e.message)
-        }
-    }
     console.log('Valda befintliga arter:', selectedSpeciesIds);
     console.log('Egna arter:', newSpecies);
  
