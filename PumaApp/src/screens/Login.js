@@ -58,7 +58,7 @@ export default function Login()
 								style={styles.input}
 								value={email}
 								onChangeText={setEmail}
-								placeholder="Email"
+								placeholder="E-postadress"
 								placeholderTextColor={COLORS.placeholder}
 								autoCapitalize="none"
 								autoCorrect={false}
@@ -72,7 +72,7 @@ export default function Login()
 								style={styles.input}
 								value={password}
 								onChangeText={setPassword}
-								placeholder="Password"
+								placeholder="Lösenord"
 								placeholderTextColor={COLORS.placeholder}
 								autoCapitalize="none"
 								autoCorrect={false}
