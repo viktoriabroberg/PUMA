@@ -27,15 +27,15 @@ export default function Welcome()
 			<View style={styles.buttons}>
 				<Pressable
 					onPress={() => router.push("/login")}
-					style={({ pressed }) => [styles.button, styles.buttonWhite, pressed && styles.buttonPressed]}
+					style={({ pressed }) => [styles.button, styles.buttonBrown, pressed && styles.buttonPressed]}
 				>
-					<Text style={[styles.buttonText, styles.buttonTextWhite]}>Logga in</Text>
+					<Text style={[styles.buttonText, styles.buttonTextBrown]}>Logga in</Text>
 				</Pressable>
 				<Pressable
 					onPress={() => router.push("/register")}
-					style={({ pressed }) => [styles.button, styles.buttonBrown, pressed && styles.buttonPressed]}
+					style={({ pressed }) => [styles.button, styles.buttonWhite, pressed && styles.buttonPressed]}
 				>
-					<Text style={[styles.buttonText, styles.buttonTextBrown]}>Registrera dig</Text>
+					<Text style={[styles.buttonText, styles.buttonTextWhite]}>Registrera dig</Text>
 				</Pressable>
 			</View>
 
