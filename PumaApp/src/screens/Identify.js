@@ -3,7 +3,7 @@ import { View, Text, Pressable, ActivityIndicator, ScrollView, StyleSheet } from
 import { identify } from "../../lib/gemini";
 
 const COLORS = {
-	background: "#F5F5F7",
+	background: "#f4f4f6",
 	card: "#FFFFFF",
 	label: "#000000",
 	secondaryLabel: "#6E6E73",
@@ -125,19 +125,20 @@ function ResultView({ result })
 
 export default function IdentifyScreen()
 {
-	const [loading, setLoading] = useState(false);
+	const [loadingText, setLoadingText] = useState(null);
 	const [result, setResult] = useState(null);
 	const [error, setError] = useState(null);
+	const loading = loadingText !== null;
 
 	async function handleIdentify(source)
 	{
-		setLoading(true);
+		setLoadingText(source === "camera" ? "Öppnar kamera…" : "Öppnar bilder…");
 		setError(null);
 		setResult(null);
 
 		try
 		{
-			const response = await identify(source);
+			const response = await identify(source, () => setLoadingText("Analyserar bilden…"));
 			if (response === null)
 			{
 				setError("Ingen bild valdes.");
@@ -153,7 +154,7 @@ export default function IdentifyScreen()
 		}
 		finally
 		{
-			setLoading(false);
+			setLoadingText(null);
 		}
 	}
 
@@ -187,10 +188,10 @@ export default function IdentifyScreen()
 
 const styles = StyleSheet.create({
 	screen: { flex: 1, backgroundColor: COLORS.background },
-	container: { padding: 16, paddingBottom: 40 },
+	container: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 40 },
 
-	largeTitle: { fontSize: 34, fontWeight: "700", letterSpacing: 0.4, color: COLORS.label, marginTop: 8 },
-	subtitle: { fontSize: 15, color: COLORS.secondaryLabel, marginTop: 4, marginBottom: 20 },
+	largeTitle: { fontSize: 32, color: COLORS.label, marginTop: 20, marginBottom: 16, marginLeft: 4 },
+	subtitle: { fontSize: 15, color: COLORS.secondaryLabel, marginLeft: 4, marginBottom: 20 },
 
 	buttonGroup: { gap: 10 },
 	button: { height: 50, borderRadius: 12, justifyContent: "center", alignItems: "center" },
