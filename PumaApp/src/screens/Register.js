@@ -76,7 +76,7 @@ export default function Register()
 								style={styles.input}
 								value={email}
 								onChangeText={setEmail}
-								placeholder="Email"
+								placeholder="E-postadress"
 								placeholderTextColor={COLORS.placeholder}
 								autoCapitalize="none"
 								autoCorrect={false}
@@ -90,7 +90,7 @@ export default function Register()
 								style={styles.input}
 								value={password}
 								onChangeText={setPassword}
-								placeholder="Password"
+								placeholder="Lösenord"
 								placeholderTextColor={COLORS.placeholder}
 								autoCapitalize="none"
 								autoCorrect={false}
@@ -174,13 +174,13 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		height: 48,
-		paddingHorizontal: 16,
+		paddingHorizontal: 14,
 		borderWidth: 1,
 		borderColor: COLORS.border,
 		borderRadius: 10,
 		backgroundColor: COLORS.card,
 	},
-	input: { flex: 1, fontSize: 18, color: COLORS.label },
+	input: { flex: 1, fontSize: 16, color: COLORS.label },
 
 	checkboxRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 14 },
 	checkbox: {
