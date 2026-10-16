@@ -39,8 +39,6 @@ export default function MyPlaces() {
 
   const header = (
     <View>
-      <Text style={styles.title}>Platser</Text>
-
       <View style={styles.searchRow}>
         <View style={styles.searchBox}>
           <Ionicons name="search" size={20} color="#000" />
@@ -67,6 +65,7 @@ export default function MyPlaces() {
     <FlatList
       style={styles.list}
       contentContainerStyle={styles.listContent}
+      contentInsetAdjustmentBehavior="automatic"
       data={searchLocations(filterLocations(locations, filter), search)}
       keyboardShouldPersistTaps="handled"
       keyExtractor={(item) => String(item.location_id)}
@@ -116,10 +115,8 @@ export default function MyPlaces() {
 }
 
 const styles = StyleSheet.create({
-  list: { backgroundColor: '#f4f4f6' },
-  listContent: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 40 },
-
-  title: { fontSize: 32, marginTop: 20, marginBottom: 16, marginLeft: 4 },
+  list: { flex: 1, backgroundColor: '#f4f4f6' },
+  listContent: { paddingTop: 8, paddingHorizontal: 16, paddingBottom: 40 },
 
   searchRow: {
     flexDirection: 'row',

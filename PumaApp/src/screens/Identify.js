@@ -159,8 +159,7 @@ export default function IdentifyScreen()
 	}
 
 	return (
-		<ScrollView style={styles.screen} contentContainerStyle={styles.container}>
-			<Text style={styles.largeTitle}>Identifiera</Text>
+		<ScrollView style={styles.screen} contentContainerStyle={styles.container} contentInsetAdjustmentBehavior="automatic">
 			<Text style={styles.subtitle}>Fotografera eller välj en bild på en svamp eller ett bär.</Text>
 
 			<View style={styles.buttonGroup}>
@@ -188,9 +187,8 @@ export default function IdentifyScreen()
 
 const styles = StyleSheet.create({
 	screen: { flex: 1, backgroundColor: COLORS.background },
-	container: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 40 },
+	container: { paddingTop: 8, paddingHorizontal: 16, paddingBottom: 40 },
 
-	largeTitle: { fontSize: 32, color: COLORS.label, marginTop: 20, marginBottom: 16, marginLeft: 4 },
 	subtitle: { fontSize: 15, color: COLORS.secondaryLabel, marginLeft: 4, marginBottom: 20 },
 
 	buttonGroup: { gap: 10 },

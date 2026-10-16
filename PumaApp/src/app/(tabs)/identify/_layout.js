@@ -4,9 +4,12 @@ export default function IdentifyLayout(){
     return (
         <Stack
     screenOptions={{
-      headerShown: false,
+      headerTransparent: true,
+      headerLargeTitleEnabled: true,
+      headerShadowVisible: false,
+      headerLargeTitleShadowVisible: false,
     }}>
-      <Stack.Screen name="index" />
+      <Stack.Screen name="index" options={{ title: 'Identifiera' }} />
 </Stack>
     );
 }
