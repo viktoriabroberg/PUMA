@@ -1,8 +1,8 @@
 import { useEffect, useState , useRef} from 'react';
-import { Image, View } from 'react-native';
+import { Image as RNImage, Pressable, View, Text as RNText, } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Host, Button, Form, TextField,HStack, Section, useNativeState, VStack } from '@expo/ui/swift-ui';
-import {buttonStyle,controlSize,scrollContentBackground,background, submitLabel, textFieldStyle, onSubmit
+import { Host, Button, Form, TextField,HStack, Section, useNativeState, VStack, Text,ZStack, Image} from '@expo/ui/swift-ui';
+import {buttonStyle,controlSize,multilineTextAlignment,submitLabel, textFieldStyle, onSubmit,frame,background,foregroundStyle, clipped
 } from '@expo/ui/swift-ui/modifiers';
 import { createPlaceFunction, getSpecies} from '../services/CreatePlaceService';
 import { StyleSheet } from 'react-native';
@@ -143,25 +143,32 @@ export default function CreatePlace() {
       setSaving(false);
     }
   }
-
+console.log('photoUri:', photoUri);
   return (
     <View style={{ flex: 1 }}>
-      {/* Förhandsvisning av tagen bild */}
-      {photoUri ? (
-        <Image
-          source={{ uri: photoUri }}
-          style={{ width: '100%', height: 220 }}
-          resizeMode="cover"
-        />
-      ) : null}
 
       <Host style={{ flex: 1 }}>
-        <Form>
-          <Button
-              label={photoUri ? 'Ta ny bild' : 'Ta bild'}
-              onPress={() => router.push('/map/createPlace/camera')}
-              modifiers={[buttonStyle('bordered'), controlSize('large')]}
-          />
+        <Form>   
+
+        <View style={{ height: 300, width: '100%' }}>
+        <Pressable
+            onPress={() => router.push('/map/createPlace/camera')}
+            style={{ flex: 1, backgroundColor: '#D1D1D1', overflow: 'hidden' }}
+        >
+            {photoUri ? (
+            <RNImage
+                source={{ uri: photoUri }}
+                style={StyleSheet.absoluteFillObject}
+                resizeMode="cover"
+            />
+            ) : null}
+
+            <RNText style={styles.photoButtonText}>
+            {photoUri ? 'Ta ny bild' : 'Ta bild'}
+            </RNText>
+        </Pressable>
+        </View>
+
           <Section title="Namn">
             <TextField
               placeholder="Namn på plats"
@@ -265,3 +272,21 @@ export default function CreatePlace() {
     </View>
   );
 }
+const styles = StyleSheet.create({
+photoButton: {
+  height: '100%',
+  width: '100%',
+  backgroundColor: '#D1D1D1',
+  borderRadius: 8,
+  overflow: 'hidden',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+photoButtonText: {
+  color: '#FFFFFF',
+  fontSize: 16,
+  fontWeight: '600',
+  textShadowColor: '#000000',
+  textShadowRadius: 4,
+}
+});
