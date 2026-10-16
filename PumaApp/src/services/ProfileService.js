@@ -24,5 +24,6 @@ export const getMyProfile = async () => {
     throw error;
   }
  
-  return data;
+  //return data;
+  return { ...data, email: user.email };
 };

@@ -3,6 +3,7 @@ import { View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-nati
 import { useRouter } from 'expo-router';
 import { getMyProfile } from '../services/ProfileService';
 import { logOutUser } from '../services/logOutService';
+import { COLORS } from '../constants/colors';
 
 export default function Profile() {
   const router = useRouter();
@@ -37,10 +38,12 @@ export default function Profile() {
 
   if (error || !profile) {
     return (
-      <View style={styles.center}>
-        <Text>Kunde inte hämta profilen.</Text>
-        <Pressable style={styles.logOutButton} onPress={handleLogOut}>
-          <Text style={styles.logOutText}>Logga ut</Text>
+      <View style={styles.container}>
+        <View style={styles.top}>
+          <Text style={styles.email}>Kunde inte hämta profilen.</Text>
+        </View>
+        <Pressable style={styles.button} onPress={handleLogOut}>
+          <Text style={styles.buttonText}>Logga ut</Text>
         </Pressable>
       </View>
     );
@@ -48,11 +51,13 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Ditt användarnamn:</Text>
-      <Text style={styles.name}>{profile.name}</Text>
+      <View style={styles.top}>
+        <Text style={styles.title}>{profile.name}</Text>
+        <Text style={styles.email}>{profile.email}</Text>
+      </View>
 
-      <Pressable style={styles.logOutButton} onPress={handleLogOut}>
-        <Text style={styles.logOutText}>Logga ut</Text>
+      <Pressable style={styles.button} onPress={handleLogOut}>
+        <Text style={styles.buttonText}>Logga ut</Text>
       </Pressable>
     </View>
   );
@@ -60,16 +65,24 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  container: { flex: 1, padding: 20, paddingTop: 80 },
-  label: { fontSize: 13, color: '#666', marginBottom: 4 },
-  name: { fontSize: 20 },
-  logOutButton: {
-    alignSelf: 'flex-start',
-    marginTop: 32,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 24,
-    backgroundColor: '#0C7A1A',
+  container: {
+    flex: 1,
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    justifyContent: 'space-between', // namn och e-post uppe, knappen längst ner
   },
-  logOutText: { color: '#fff', fontSize: 17, fontWeight: '500' },
+  top: {},
+  title: { fontSize: 32, marginTop: 20, marginBottom: 16, marginLeft: 4 },
+  email: { fontSize: 16, marginLeft: 4 },
+  button: {
+    height: 52,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.brown,
+    marginHorizontal: 20,
+    marginTop: 28,
+    marginBottom: 500,
+  },
+  buttonText: { color: '#fff', fontSize: 17 },
 });
