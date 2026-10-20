@@ -1,14 +1,19 @@
 import { Stack } from 'expo-router';
 
+// Transparent header med bara en tillbaka-pil, likt MapMiddleView
+const backOnlyHeader = {
+  headerShown: true,
+  headerTransparent: true,
+  title: '',
+  headerBackButtonDisplayMode: 'minimal',
+};
+
 export default function MapLayout() {
   return (
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen name="createPlace" options={{ headerBackTitle: 'Karta'}} />
-      
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="createPlace/index" options={backOnlyHeader} />
+      <Stack.Screen name="createPlace/camera/index" options={backOnlyHeader} />
     </Stack>
   );
 }
