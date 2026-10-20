@@ -297,14 +297,13 @@ console.log('photoUri:', photoUri);
             modifiers={[submitLabel('done')]}
           />
         </Section>
-
-          <Section>
+    
             <Button
               label="Spara"
               onPress={save}
               modifiers={[buttonStyle('borderedProminent'), controlSize('large')]}
             />
-          </Section>
+   
         </Form>
       </Host>
     </View>
@@ -336,7 +335,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 18,
     borderRadius: 8,
-    backgroundColor: '#007AFF',
   },
   retakeButtonText: {
     color: '#FFFFFF',
