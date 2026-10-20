@@ -41,11 +41,7 @@ export default function FilterMenu({ value = DEFAULT_FILTER, onChange, species, 
     <Host matchContents>
       <Menu
         label="Filter"
-        systemImage={
-          isFilterActive(value)
-            ? 'line.3.horizontal.decrease.circle.fill'
-            : 'line.3.horizontal.decrease'
-        }
+        systemImage="line.3.horizontal.decrease"
         modifiers={[labelStyle('iconOnly'), imageScale('large'), tint(color)]}
       >
         <Section title="Filter">

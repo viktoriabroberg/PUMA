@@ -22,7 +22,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { getCurrentLocation } from '../services/GpsService';
 import { watchLocation } from '../services/GpsService';
 import { getMyLocations } from '../services/PlaceService';
-import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
+import { DEFAULT_FILTER, filterLocations, isFilterActive } from '../services/FilterService';
 import { searchLocations } from '../services/SearchService';
 import FilterMenu from '../components/FilterMenu';
 import { COLORS } from '../constants/colors';
@@ -206,8 +206,12 @@ export default function Map() {
             )}
           </View>
 
-          <View style={styles.filterButton}>
-            <FilterMenu value={filter} onChange={setFilter} />
+          <View style={[styles.filterButton, isFilterActive(filter) && styles.filterButtonActive]}>
+            <FilterMenu
+              value={filter}
+              onChange={setFilter}
+              color={isFilterActive(filter) ? '#fff' : '#000'}
+            />
           </View>
         </View>
 
@@ -356,6 +360,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...shadow,
+  },
+  filterButtonActive: {
+    backgroundColor: COLORS.green,
   },
 
   suggestions: {
