@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: COLORS.brown,
+		backgroundColor: COLORS.green,
 		marginTop: 28,
 		marginBottom: 28,
 	},
@@ -218,5 +218,5 @@ const styles = StyleSheet.create({
 	
 
 	footer: { fontSize: 15, color: COLORS.label, textAlign: "center", marginTop: 28 },
-	footerLink: { color: COLORS.brown, textAlign: "center" },
+	footerLink: { color: COLORS.green, textAlign: "center" },
 });
