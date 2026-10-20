@@ -13,7 +13,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Host, Button } from '@expo/ui/swift-ui';
-import { buttonStyle, controlSize } from '@expo/ui/swift-ui/modifiers';
+import {
+  buttonStyle,
+  controlSize,
+  tint,
+} from '@expo/ui/swift-ui/modifiers';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getCurrentLocation } from '../services/GpsService';
 import { watchLocation } from '../services/GpsService';
@@ -21,6 +25,7 @@ import { getMyLocations } from '../services/PlaceService';
 import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
 import { searchLocations } from '../services/SearchService';
 import FilterMenu from '../components/FilterMenu';
+import { COLORS } from '../constants/colors';
 
 const BANNER_HEIGHT_RATIO = 0.4;
 const FOCUS_DELTA = 0.01;
@@ -29,6 +34,8 @@ export default function Map() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const mapRef = useRef(null);
+  const hasCentered = useRef(false);
+  const [mapReady, setMapReady] = useState(false);
   const [location, setLocation] = useState(null);
   const [places, setPlaces] = useState([]);
   const [filter, setFilter] = useState(DEFAULT_FILTER);
@@ -42,25 +49,52 @@ export default function Map() {
     }, [])
   );
 
-    useEffect(() => {
+  useEffect(() => {
     let subscription;
+    let cancelled = false;
     async function trackLockation() {
       //Hämta plats en gång
       const currentLocation = await getCurrentLocation();
+      if (cancelled) return;
       if (currentLocation) {
         setLocation(currentLocation);
       }
 
       //Prenumerera på aktuell position för att uppdatera om användaren rör sig
-      const subscription = await watchLocation((newLocation) => {
+      subscription = await watchLocation((newLocation) => {
         setLocation(newLocation);
       });
-
+      if (cancelled) subscription?.remove();
     }
 
     trackLockation();
 
+    //Stoppa GPS-bevakningen när komponenten avmonteras
+    return () => {
+      cancelled = true;
+      subscription?.remove();
+    };
   }, []);
+
+  const centerOnUser = () => {
+    if (!location) return;
+    mapRef.current?.animateToRegion(
+      {
+        ...location,
+        latitudeDelta: FOCUS_DELTA,
+        longitudeDelta: FOCUS_DELTA,
+      },
+      500
+    );
+  };
+
+  // Centrera kartan runt användaren en gång, först när både kartan är redo och
+  // positionen finns. Annars ignoreras animeringen om platsen hämtas innan kartan laddats.
+  useEffect(() => {
+    if (!mapReady || !location || hasCentered.current) return;
+    hasCentered.current = true;
+    centerOnUser();
+  }, [mapReady, location]);
 
   // Endast pins vars arter matchar filtret visas
   const visiblePlaces = filterLocations(places, filter).filter(
@@ -96,6 +130,7 @@ export default function Map() {
         ref={mapRef}
         style={StyleSheet.absoluteFill}
         onPress={Keyboard.dismiss}
+        onMapReady={() => setMapReady(true)}
         //Kartan utgår från dessa innan användaren godkänner platsinfo
         initialRegion={{
           latitude: 63.820556,
@@ -104,16 +139,21 @@ export default function Map() {
           longitudeDelta: 0.01,
         }}
       >
-       {location&&(
-         <Marker
-         //Visa endast marker om location finns
-          coordinate={{
-            latitude: location.latitude ,
-            longitude: location.longitude ,
-          }}
-          title="Du"
-          description="Här är du!"
-        />)}
+        {location && (
+          // Visa endast användarens prick om location finns
+          <Marker
+            coordinate={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }}
+            anchor={{ x: 0.5, y: 0.5 }}
+            tappable={false}
+          >
+            <View style={styles.userHalo}>
+              <View style={styles.userDot} />
+            </View>
+          </Marker>
+        )}
 
         {visiblePlaces.map((place) => (
             <Marker
@@ -128,6 +168,20 @@ export default function Map() {
             />
           ))}
       </MapView>
+
+      {/* Under filterknappen. Ligger före topBar så att sökförslagen hamnar ovanpå */}
+      <Pressable
+        onPress={centerOnUser}
+        accessibilityRole="button"
+        accessibilityLabel="Min position"
+        style={({ pressed }) => [
+          styles.locateButton,
+          { top: insets.top + 8 + 48 + 575 },
+          pressed && styles.locatePressed,
+        ]}
+      >
+        <Ionicons name="navigate" size={22} color={COLORS.green} />
+      </Pressable>
 
       <View style={[styles.topBar, { top: insets.top + 8 }]} pointerEvents="box-none">
         <View style={styles.searchRow}>
@@ -204,7 +258,11 @@ export default function Map() {
           <Button
             label="Lägg till plats"
             onPress={() => router.push('/map/createPlace')}
-            modifiers={[buttonStyle('bordered'), controlSize('large')]}
+            modifiers={[
+              buttonStyle('borderedProminent'),
+              controlSize('large'),
+              tint(COLORS.green),
+            ]}
           />
         </Host>
       </View>
@@ -235,6 +293,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',         
     paddingBottom: 24,            
   },
+
+  userHalo: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.green + '33',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.green,
+    borderWidth: 3,
+    borderColor: '#fff',
+    ...shadow,
+  },
+
+  locateButton: {
+    position: 'absolute',
+    right: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow,
+  },
+  locatePressed: { opacity: 0.6 },
 
   topBar: {
     position: 'absolute',

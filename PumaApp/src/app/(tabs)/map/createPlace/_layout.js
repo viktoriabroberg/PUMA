@@ -5,7 +5,14 @@ export default function CreatePlaceLayout() {
     <Stack>
       <Stack.Screen
         name="index"
-        options={{ title: 'Lägg till plats', headerBackTitle: 'Karta' }}
+        options={{
+          title: 'Lägg till plats',
+          headerBackTitle: 'Karta',
+          headerTransparent: true,
+          headerLargeTitleEnabled: true,
+          headerShadowVisible: false,
+          headerLargeTitleShadowVisible: false,
+        }}
       />
        
       
