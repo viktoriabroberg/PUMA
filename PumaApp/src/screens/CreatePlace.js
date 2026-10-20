@@ -1,12 +1,14 @@
 import { useEffect, useState , useRef, useCallback} from 'react';
-import { Image as RNImage, View, useWindowDimensions  } from 'react-native';
+import { Image as RNImage, Text as RNText, Pressable, View, useWindowDimensions  } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { Host, Button, Form, TextField, HStack, Section, useNativeState, VStack, Text, ZStack, RNHostView } from '@expo/ui/swift-ui';
+import { Host, Button, Form, TextField, HStack, Section, useNativeState, VStack, Text, ZStack, RNHostView, Spacer } from '@expo/ui/swift-ui';
 import {
 buttonStyle, controlSize, submitLabel, textFieldStyle, onSubmit,
-  frame, background, foregroundColor, onTapGesture, shapes,scaleEffect
+  frame, background, foregroundColor, onTapGesture, shapes,scaleEffect,
+  listRowBackground, listRowInsets,
 } from '@expo/ui/swift-ui/modifiers';
 import { createPlaceFunction, getSpecies,addSpeciesFunction} from '../services/CreatePlaceService';
+import { COLORS } from '../constants/colors';
 import { StyleSheet } from 'react-native';
 export default function CreatePlace() {
     const { width } = useWindowDimensions();
@@ -30,17 +32,22 @@ export default function CreatePlace() {
     //Mängd, sätts av användaren
     const amountImages = {
         1:{
+          label: 'Sparsamt',
+          width: 16,
           normal: require('../../assets/amountIndicator/greyIndicator1.png'),
           selected: require('../../assets/amountIndicator/whiteIndicator1.png')
         },
         2:{
+          label: 'Måttligt',
+          width: 41,
           normal: require('../../assets/amountIndicator/greyIndicator2.png'),
           selected: require('../../assets/amountIndicator/whiteIndicator2.png')
         },
         3:{
+          label: 'Rikligt',
+          width: 65,
           normal: require('../../assets/amountIndicator/greyIndicator3.png'),
           selected: require('../../assets/amountIndicator/whiteIndicator3.png')
-
         }
     };
     const amountOptions = [1, 2, 3];
@@ -209,30 +216,53 @@ console.log('photoUri:', photoUri);
         </Section>
         
 
-        <Section title="Mängd">
-          {chunk(amountOptions, 3).map((row, i) => (
-            <HStack key={i} spacing={8} >
-              {row.map((a) => (
-                <Button
-                key={a}
-                onPress={() => selectedAmount(a)}
-                modifiers={[
-                  buttonStyle(amount === a ? 'borderedProminent' : 'bordered' ),
-                  controlSize('large'),
-                ]}
-              >
-                <RNHostView matchContents>
-                  <RNImage
-          
-                    source={amount === a ? amountImages[a].selected : amountImages[a].normal}
-                    style={{ transform: [{ scale: 0.65 },{ translateX: -25 }, { translateY: -20 }]}}
-                    resizeMode="contain"
-                  />
-                </RNHostView>
-              </Button>
-              ))}
-            </HStack>
-          ))}
+        <Section
+          title="Mängd"
+          modifiers={[
+            listRowBackground('#F2F2F7'),
+            listRowInsets({ top: 0, bottom: 0, leading: 0, trailing: 0 }),
+          ]}
+        >
+          <RNHostView matchContents>
+            <View style={[styles.amountRow, { width: width - 40 }]}>
+              {amountOptions.map((a) => {
+                const isSelected = amount === a;
+                const img = amountImages[a];
+                return (
+                  <Pressable
+                    key={a}
+                    onPress={() => selectedAmount(a)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
+                    style={({ pressed }) => [
+                      styles.amountButton,
+                      isSelected && styles.amountButtonSelected,
+                      pressed && { opacity: 0.7 },
+                    ]}
+                  >
+                    {/* Båda bilderna renderas alltid så att bytet sker direkt utan omladdning */}
+                    <View style={{ width: img.width, height: 16 }}>
+                      <RNImage
+                        source={img.normal}
+                        style={[styles.amountImage, { opacity: isSelected ? 0 : 1 }]}
+                        resizeMode="contain"
+                        fadeDuration={0}
+                      />
+                      <RNImage
+                        source={img.selected}
+                        style={[styles.amountImage, { opacity: isSelected ? 1 : 0 }]}
+                        resizeMode="contain"
+                        fadeDuration={0}
+                      />
+                    </View>
+                    <RNText style={[styles.amountLabel, isSelected && styles.amountLabelSelected]}>
+                      {img.label}
+                    </RNText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </RNHostView>
         </Section>
 
         <VStack alignment="leading" >
@@ -297,19 +327,60 @@ console.log('photoUri:', photoUri);
             modifiers={[submitLabel('done')]}
           />
         </Section>
-    
-            <Button
-              label="Spara"
-              onPress={save}
-              modifiers={[buttonStyle('borderedProminent'), controlSize('large')]}
-            />
-   
+
+
+          <Section modifiers={[listRowBackground('#F2F2F7')]}>
+            <HStack>
+              <Spacer />
+              <Button
+                label="Spara"
+                onPress={save}
+                modifiers={[buttonStyle('borderedProminent'), controlSize('large')]}
+              />
+              <Spacer />
+            </HStack>
+          </Section>
         </Form>
       </Host>
     </View>
   );
 }
 const styles = StyleSheet.create({
+  amountRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 4,
+  },
+  amountButton: {
+    flex: 1,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  amountButtonSelected: {
+    backgroundColor: COLORS.green,
+  },
+  amountImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  },
+  amountLabel: {
+    fontSize: 14,
+    color: '#000000',
+  },
+  amountLabelSelected: {
+    color: '#FFFFFF',
+  },
   photoContainer: {
     paddingHorizontal: 16,
     paddingTop: 16,
