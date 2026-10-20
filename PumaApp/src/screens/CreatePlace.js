@@ -1,13 +1,15 @@
-import { useEffect, useState , useRef} from 'react';
-import { Image as RNImage, Pressable, View, Text as RNText, } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Host, Button, Form, TextField,HStack, Section, useNativeState, VStack, Text,ZStack, Image} from '@expo/ui/swift-ui';
-import {buttonStyle,controlSize,multilineTextAlignment,submitLabel, textFieldStyle, onSubmit,frame,background,foregroundStyle, clipped
+import { useEffect, useState , useRef, useCallback} from 'react';
+import { Image as RNImage, View, useWindowDimensions  } from 'react-native';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { Host, Button, Form, TextField, HStack, Section, useNativeState, VStack, Text, ZStack, RNHostView } from '@expo/ui/swift-ui';
+import {
+buttonStyle, controlSize, submitLabel, textFieldStyle, onSubmit,
+  frame, background, foregroundColor, onTapGesture, shapes,scaleEffect
 } from '@expo/ui/swift-ui/modifiers';
-import { createPlaceFunction, getSpecies} from '../services/CreatePlaceService';
+import { createPlaceFunction, getSpecies,addSpeciesFunction} from '../services/CreatePlaceService';
 import { StyleSheet } from 'react-native';
-
 export default function CreatePlace() {
+    const { width } = useWindowDimensions();
     const router = useRouter();
     // Bildens uri skickas hit från kameraskärmen
     const { photoUri } = useLocalSearchParams();
@@ -16,8 +18,7 @@ export default function CreatePlace() {
     const mushroomState = useNativeState('');
     const berryState = useNativeState('');
     const inputSpeciesState = useNativeState('');
-    //const inputMushroomSpeciesState = useNativeState('');
-    //const inputBerrySpeciesState = useNativeState('');
+
     const [type, setType] = useState('');     
 
     //Lista med alla arter med id osv
@@ -27,6 +28,21 @@ export default function CreatePlace() {
     //För egna arter
     const [newSpecies, setNewSpecies] = useState([]);
     //Mängd, sätts av användaren
+    const amountImages = {
+        1:{
+          normal: require('../../assets/amountIndicator/greyIndicator1.png'),
+          selected: require('../../assets/amountIndicator/whiteIndicator1.png')
+        },
+        2:{
+          normal: require('../../assets/amountIndicator/greyIndicator2.png'),
+          selected: require('../../assets/amountIndicator/whiteIndicator2.png')
+        },
+        3:{
+          normal: require('../../assets/amountIndicator/greyIndicator3.png'),
+          selected: require('../../assets/amountIndicator/whiteIndicator3.png')
+
+        }
+    };
     const amountOptions = [1, 2, 3];
     const [amount, setAmount] = useState(null);
 
@@ -39,15 +55,14 @@ export default function CreatePlace() {
     const mushrooms = speciesList.filter((s) => s.type ==='Svamp');
     const berries = speciesList.filter((s) => s.type === 'Bär'); 
 
-    // Useeffect som anvädner service och lägger till allt på arttabellen i artlistan
-    //Kolla på att ändra till useFocusEffect
-    useEffect(() =>{
-        console.log('Valda arter:', selectedSpeciesIds);
-            getSpecies()
+  
+     useFocusEffect(
+        useCallback(() => {
+          getSpecies()
             .then(setSpeciesList)
-            .catch((e) =>  alert(e.message));
-    },[]);
-
+            .catch((e) => alert(e.message));
+        }, [])
+    );
 
 
   //Funktion för att dela upp alla arter
@@ -60,33 +75,38 @@ export default function CreatePlace() {
   }
 
     //Funktion för att välja arter och lägga in i speciesIds
-    function addNewSpecies(inputSpeciesState,type){
-        //Hämta namn från input
-        const inputSpecies = inputSpeciesState.value.trim();
-        console.log('addNewSpecies körs med:', inputSpeciesState.value, type);
-            //Om namn inte kommit in så retunera
-            if(!inputSpecies){return;}
-        //Kontrollera så att tillagd art inte läggs till dubbelt
-         const alreadyExists =
-            newSpecies.some(
-            (s) =>
-                s.type === type &&
-                s.name.toLowerCase() === inputSpecies.toLowerCase()
-            );
-        if (alreadyExists) {
-            alert('Arten finns redan');
-            return;
-        }
-        else{
-            setNewSpecies((prev) => [...prev, { name: inputSpecies, type }]);
-        }
-        //Om art inte finns så lägg till i listan med newSpecies
-    
+    async function addNewSpecies(inputSpeciesState, type) {
+      //Hämta namn från input
+      const inputSpecies = inputSpeciesState.value.trim();
+      console.log('addNewSpecies körs med:', inputSpeciesState.value, type);
+
+      //Om namn inte kommit in så returnera
+      if (!inputSpecies) { return; }
+
+      //Kontrollera så att arten inte redan finns i listan med arter
+      const alreadyExists = speciesList.some(
+        (s) =>
+          s.type === type &&
+          s.name.toLowerCase() === inputSpecies.toLowerCase()
+      );
+      if (alreadyExists) {
+        alert('Arten finns redan');
+        return;
+      }
+
+      try {
+        //Lägg in arten i databasen och få tillbaka dess id
+        const id = await addSpeciesFunction(inputSpecies, type);
+        //Hämta om listan så att arten syns som knapp
+        setSpeciesList(await getSpecies());
+        //Markera den nya arten som vald
+        setSelectedSpeciesIds((prev) => [...prev, id]);
         inputSpeciesState.set('');
+      } catch (e) {
+        alert(e.message);
+      }
     }
-    //Funktion för att kolla om ny art är tilllagd
-
-
+    
     function toggleSpecies(id) {
             setSelectedSpeciesIds((prev) =>
             prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -96,7 +116,9 @@ export default function CreatePlace() {
     function selectedAmount(id) {
         setAmount(id);   // ersätter det gamla värdet
     }
-    
+    function openCamera() {
+      router.push('/map/createPlace/camera');
+    }
 
   async function save() {
     const placeName = nameState.value.trim();
@@ -108,10 +130,9 @@ export default function CreatePlace() {
     }
     
     console.log('Valda befintliga arter:', selectedSpeciesIds);
-    console.log('Egna arter:', newSpecies);
  
     //Kontroll så att art anges
-    if (selectedSpeciesIds.length === 0 && newSpecies.length === 0) {
+    if (selectedSpeciesIds.length === 0/* && newSpecies.length === 0*/) {
       alert('Välj minst en art');
       return;
     }
@@ -132,8 +153,8 @@ export default function CreatePlace() {
         amount,
         description: placeNote,
         pictureUri: photoUri ?? null,
-        speciesIds: selectedSpeciesIds,
-        newSpecies
+        speciesIds: selectedSpeciesIds
+    
       });
       router.push('/map');
     } catch (e) {
@@ -147,51 +168,68 @@ console.log('photoUri:', photoUri);
   return (
     <View style={{ flex: 1 }}>
 
-      <Host style={{ flex: 1 }}>
-        <Form>   
+       <Host style={{ flex: 1 }}>
+        <Form>
 
-        <View style={{ height: 300, width: '100%' }}>
-        <Pressable
-            onPress={() => router.push('/map/createPlace/camera')}
-            style={{ flex: 1, backgroundColor: '#D1D1D1', overflow: 'hidden' }}
-        >
+            <VStack spacing={12}>
+            <ZStack
+                modifiers={[
+                frame({ width: width - 64, height: photoUri ? 300 : 160 }),
+                background('#D1D1D1', shapes.roundedRectangle({ cornerRadius: 12 })),
+                ...(photoUri ? [] : [onTapGesture(openCamera)]),
+                ]}
+            >
+                {photoUri ? (
+                <RNHostView>
+                    <RNImage
+                    source={{ uri: String(photoUri) }}
+                    style={{ flex: 1, borderRadius: 12 }}
+                    resizeMode="cover"
+                    />
+                </RNHostView>
+                ) : (
+                <Text modifiers={[foregroundColor('#333333')]}>Ta bild</Text>
+                )}
+            </ZStack>
+
             {photoUri ? (
-            <RNImage
-                source={{ uri: photoUri }}
-                style={StyleSheet.absoluteFillObject}
-                resizeMode="cover"
-            />
+                <Button
+                label="Ta ny bild"
+                onPress={openCamera}
+                modifiers={[buttonStyle('bordered'), controlSize('small')]}
+                />
             ) : null}
-
-            <RNText style={styles.photoButtonText}>
-            {photoUri ? 'Ta ny bild' : 'Ta bild'}
-            </RNText>
-        </Pressable>
-        </View>
-
-          <Section title="Namn">
+            </VStack>
+        <Section title="Namn">
             <TextField
-              placeholder="Namn på plats"
-              text={nameState}
-              modifiers={[submitLabel('done')]}
+            placeholder="Namn på plats"
+            text={nameState}
+            modifiers={[submitLabel('done')]}
             />
-          </Section>
+        </Section>
+        
 
         <Section title="Mängd">
           {chunk(amountOptions, 3).map((row, i) => (
             <HStack key={i} spacing={8} >
               {row.map((a) => (
                 <Button
-                  key={a}
-                  label={String(a)}
-                  onPress={() => selectedAmount(a)}
-                  modifiers={[
-                    buttonStyle(
-                      amount === a ? 'borderedProminent' : 'bordered'
-                    ),
-                    controlSize('large'),
-                  ]}
-                />
+                key={a}
+                onPress={() => selectedAmount(a)}
+                modifiers={[
+                  buttonStyle(amount === a ? 'borderedProminent' : 'bordered' ),
+                  controlSize('large'),
+                ]}
+              >
+                <RNHostView matchContents>
+                  <RNImage
+          
+                    source={amount === a ? amountImages[a].selected : amountImages[a].normal}
+                    style={{ transform: [{ scale: 0.65 },{ translateX: -25 }, { translateY: -20 }]}}
+                    resizeMode="contain"
+                  />
+                </RNHostView>
+              </Button>
               ))}
             </HStack>
           ))}
@@ -273,20 +311,36 @@ console.log('photoUri:', photoUri);
   );
 }
 const styles = StyleSheet.create({
-photoButton: {
-  height: '100%',
-  width: '100%',
-  backgroundColor: '#D1D1D1',
-  borderRadius: 8,
-  overflow: 'hidden',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-photoButtonText: {
-  color: '#FFFFFF',
-  fontSize: 16,
-  fontWeight: '600',
-  textShadowColor: '#000000',
-  textShadowRadius: 4,
-}
+  photoContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  photoBox: {
+    height: 220,
+    width: '100%',
+    backgroundColor: '#D1D1D1',
+    borderRadius: 12,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoBoxText: {
+    color: '#333333',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  retakeButton: {
+    alignSelf: 'center',
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    backgroundColor: '#007AFF',
+  },
+  retakeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

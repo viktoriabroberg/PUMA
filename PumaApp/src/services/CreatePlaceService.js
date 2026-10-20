@@ -71,13 +71,18 @@ async function insertNewSpecies(newSpecies, profileId) {
   return data.map((s) => s.species_id);
 }
 
+export async function addSpeciesFunction(name, type) {
+  const profileId = await getCurrentProfileId();
+  const [speciesId] = await insertNewSpecies([{ name, type }], profileId);
+  return speciesId;
+}
+
 export async function createPlaceFunction({
   name,
   amount,
   description,
   pictureUri = null,
   speciesIds = [],
-  newSpecies = [],
 }) {
   const location = await getCurrentLocation();
   if (!location) throw new Error('Kunde inte hämta position');
@@ -106,10 +111,10 @@ export async function createPlaceFunction({
   if (placeError) throw placeError;
 
   // Skapa eventuella egna arter
-  const newSpeciesIds = await insertNewSpecies(newSpecies, profileId);
+  //const newSpeciesIds = await insertNewSpecies(newSpecies, profileId);
 
   // Koppla platsen till alla arter
-  const allSpeciesIds = [...new Set([...speciesIds, ...newSpeciesIds])];
+  const allSpeciesIds = [...new Set([...speciesIds])];
   if (allSpeciesIds.length > 0) {
     const { error: linkError } = await supabase
       .from('location_species')
