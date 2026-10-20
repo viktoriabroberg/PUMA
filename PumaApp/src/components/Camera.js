@@ -24,21 +24,17 @@ export default function App() {
     }
   };
 
-  if (!permission) {
-    // Väntar på tillåtelse till kamera.
-    return <View />;
+  useEffect(() => {
+  // Fråga bara om tillåtelse har inte getts och det fortfarande går att fråga
+  if (permission && !permission.granted && permission.canAskAgain) {
+    requestPermission();
   }
+}, [permission]);
 
-  if (!permission.granted) {
-    //Om tillåtels till kamera inte ges.
-    return (
-      <View style={styles.container}>
-        <Host>
-            <Button onPress={requestPermission} title="grant permission" />
-        </Host>
-      </View>
-    );
-  }
+if (!permission || !permission.granted) {
+  // Väntar på tillåtelse, eller så nekades den: visa svart skärm
+  return <View style={{ flex: 1, backgroundColor: 'black' }} />;
+}
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
