@@ -5,7 +5,7 @@ import { Host, Button, Form, TextField, HStack, Section, useNativeState, VStack,
 import {
 buttonStyle, controlSize, submitLabel, textFieldStyle, onSubmit,
   frame, background, foregroundColor, onTapGesture, shapes,scaleEffect,
-  listRowBackground, listRowInsets,
+  listRowBackground, listRowInsets,tint
 } from '@expo/ui/swift-ui/modifiers';
 import { createPlaceFunction, getSpecies,addSpeciesFunction} from '../services/CreatePlaceService';
 import { COLORS } from '../constants/colors';
@@ -85,7 +85,6 @@ export default function CreatePlace() {
     async function addNewSpecies(inputSpeciesState, type) {
       //Hämta namn från input
       const inputSpecies = inputSpeciesState.value.trim();
-      console.log('addNewSpecies körs med:', inputSpeciesState.value, type);
 
       //Om namn inte kommit in så returnera
       if (!inputSpecies) { return; }
@@ -126,6 +125,7 @@ export default function CreatePlace() {
     function openCamera() {
       router.push('/map/createPlace/camera');
     }
+    
 
   async function save() {
     const placeName = nameState.value.trim();
@@ -135,9 +135,7 @@ export default function CreatePlace() {
     if (!placeName) {
       return;
     }
-    
-    console.log('Valda befintliga arter:', selectedSpeciesIds);
- 
+     
     //Kontroll så att art anges
     if (selectedSpeciesIds.length === 0/* && newSpecies.length === 0*/) {
       alert('Välj minst en art');
@@ -171,7 +169,7 @@ export default function CreatePlace() {
       setSaving(false);
     }
   }
-console.log('photoUri:', photoUri);
+
   return (
     <View style={{ flex: 1 }}>
 
@@ -280,6 +278,7 @@ console.log('photoUri:', photoUri);
                         : 'bordered'
                     ),
                     controlSize('large'),
+                    
                 ]}
                 />
             ))}
