@@ -199,7 +199,7 @@ export default function CreatePlace() {
     return (
       <Text
         modifiers={[
-          font({ size: 20, weight: 'semibold' }),
+          font({ size: 18, weight: 'semibold' }),
           foregroundStyle('#000000'),
           ...(noRowInsets ? [padding({ leading: 20 })] : []),
         ]}
@@ -261,8 +261,6 @@ export default function CreatePlace() {
     );
   }
 
-
-
   return (
     <View style={{ flex: 1 }}>
       <Host style={{ flex: 1 }}>
@@ -319,10 +317,10 @@ export default function CreatePlace() {
           <Section header={sectionHeader('Art')} modifiers={[headerProminence('increased')]}>
             <VStack alignment="leading" spacing={12}>
               {speciesRows(mushrooms, 'Svamp')}
-              {speciesInput(mushroomState, 'Ange egen svampart', 'Svamp')}
+              {speciesInput(mushroomState, 'Ange egen svampart här...', 'Svamp')}
               <Divider />
               {speciesRows(berries, 'Bär')}
-              {speciesInput(berryState, 'Ange egen bärart', 'Bär')}
+              {speciesInput(berryState, 'Ange egen bärart här...', 'Bär')}
             </VStack>
           </Section>
 
@@ -427,7 +425,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.green,
   },
   speciesLabel: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '500',
     color: '#000000',
   },
