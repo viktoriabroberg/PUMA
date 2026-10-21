@@ -4,14 +4,21 @@ import { supabase } from '../utils/supabase';
 // Namnet på din bucket i Supabase Storage
 const PICTURE_BUCKET = 'place-images';
 
+// Cache så att profile_id bara hämtas en gång per inloggad användare
+let cachedProfile = { userId: null, profileId: null };
+
 // Hämtar profile_id för inloggad användare
 async function getCurrentProfileId() {
+  // getSession läser lokalt sparad session, till skillnad från getUser som gör ett nätverksanrop
   const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError) throw userError;
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  const user = session?.user;
   if (!user) throw new Error('Du måste vara inloggad');
+
+  if (cachedProfile.userId === user.id) return cachedProfile.profileId;
 
   const { data: profile, error: profileError } = await supabase
     .from('profile')
@@ -20,6 +27,7 @@ async function getCurrentProfileId() {
     .single();
   if (profileError) throw profileError;
 
+  cachedProfile = { userId: user.id, profileId: profile.profile_id };
   return profile.profile_id;
 }
 
@@ -47,7 +55,7 @@ export async function getSpecies() {
     .from('Species')
     .select('species_id, name, type, fk_species_profile')
     .or(`fk_species_profile.is.null,fk_species_profile.eq.${profileId}`)
-    .order('name');
+    .order('species_id');
   if (error) throw error;
   return data;
 }
