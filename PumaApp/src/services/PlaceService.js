@@ -82,34 +82,26 @@ export const getLocationById = async (locationId) => {
   return data;
 };
 
-/* TILLFÄLLIG, ta bort när inloggningen fungerar
-export const getMyLocationsTemp = async () => {
-  const { data, error } = await supabase
-    .from('location')
-    .select(`
-      location_id,
-      name,
-      created_at,
-      picture_url,
-      amount,
-      longitude,
-      latitude,
-      description,
-      location_species (
-        species_id,
-        Species (
-          species_id,
-          name,
-          type
-        )
-      )
-    `)
-    .eq('fk_location_profile', 1);
 
-  if (error) {
+// funtkionen för uppdatera
+
+export const updateLocation = async (locationId, locationName, amount, description, picture_url) => {
+  const {data, error} = await supabase
+  .from ('location')
+  .update ({
+
+    name: locationName,
+    amount: amount,
+    description: description,
+    picture_url: picture_url
+
+  })
+  .eq('location_id', locationId)
+  .select();
+
+  if (error){
+
     throw error;
   }
-
   return data;
 };
-*/
