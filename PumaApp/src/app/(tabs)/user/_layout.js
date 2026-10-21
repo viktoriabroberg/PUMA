@@ -4,9 +4,12 @@ export default function UserLayout(){
     return (
         <Stack
     screenOptions={{
-      headerShown: false,
+      headerTransparent: true,
+      headerLargeTitleEnabled: true,
+      headerShadowVisible: false,
+      headerLargeTitleShadowVisible: false,
     }}>
-      <Stack.Screen name="index" />
+      <Stack.Screen name="index" options={{ title: '' }} />
 </Stack>
     );
 }
