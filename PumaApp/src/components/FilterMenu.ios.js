@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Host, Menu, Section, Toggle } from '@expo/ui/swift-ui';
-import {
-  labelStyle,
-  imageScale,
-  tint,
-  menuActionDismissBehavior,
-} from '@expo/ui/swift-ui/modifiers';
+import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Host, Menu, RNHostView, Section, Toggle } from '@expo/ui/swift-ui';
+import { menuActionDismissBehavior } from '@expo/ui/swift-ui/modifiers';
 import {
   CATEGORIES,
   DEFAULT_FILTER,
@@ -40,9 +37,14 @@ export default function FilterMenu({ value = DEFAULT_FILTER, onChange, species, 
   return (
     <Host matchContents>
       <Menu
-        label="Filter"
-        systemImage="line.3.horizontal.decrease"
-        modifiers={[labelStyle('iconOnly'), imageScale('large'), tint(color)]}
+        label={
+          // Ikonen ritas i RN så att SwiftUI:s accentfärg (grön) inte färgar över den
+          <RNHostView matchContents>
+            <View style={styles.trigger} accessibilityLabel="Filter">
+              <Ionicons name="filter" size={22} color={color} />
+            </View>
+          </RNHostView>
+        }
       >
         <Section title="Filter">
           <Toggle
@@ -85,3 +87,12 @@ export default function FilterMenu({ value = DEFAULT_FILTER, onChange, species, 
     </Host>
   );
 }
+
+const styles = StyleSheet.create({
+  trigger: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
