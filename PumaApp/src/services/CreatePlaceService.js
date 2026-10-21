@@ -8,7 +8,7 @@ const PICTURE_BUCKET = 'place-images';
 let cachedProfile = { userId: null, profileId: null };
 
 // Hämtar profile_id för inloggad användare
-async function getCurrentProfileId() {
+export async function getCurrentProfileId() {
   // getSession läser lokalt sparad session, till skillnad från getUser som gör ett nätverksanrop
   const {
     data: { session },
@@ -32,7 +32,7 @@ async function getCurrentProfileId() {
 }
 
 // Laddar upp en bild från telefonen till Supabase Storage och returnerar bildens publika URL
-async function uploadPicture(uri, profileId) {
+export async function uploadPicture(uri, profileId) {
   const response = await fetch(uri);
   const arrayBuffer = await response.arrayBuffer();
 

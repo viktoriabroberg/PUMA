@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { View, Text, Image, ScrollView, ActivityIndicator, Pressable, StyleSheet, Platform, Linking, Alert, } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getLocationById } from '../services/PlaceService';
 
@@ -31,12 +31,15 @@ export default function PlaceBanner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    getLocationById(id)
-      .then(setPlace)
-      .catch((err) => setError(err))
-      .finally(() => setLoading(false));
-  }, [id]);
+  //Hämtas varje gång vyn får fokus så att ändringar från redigeringen syns direkt
+  useFocusEffect(
+    useCallback(() => {
+      getLocationById(id)
+        .then(setPlace)
+        .catch((err) => setError(err))
+        .finally(() => setLoading(false));
+    }, [id])
+  );
 
   if (loading) {
     return (
@@ -76,9 +79,7 @@ export default function PlaceBanner() {
         <View style={styles.headerButtons}>
           <Pressable
             style={styles.iconButton}
-            onPress={() => {
-              // TODO: redigera plats
-            }}
+            onPress={() => router.push(`/place/edit/${place.location_id}`)}
           >
             <Ionicons name="create-outline" size={22} color="#000" />
           </Pressable>

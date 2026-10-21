@@ -19,6 +19,14 @@ export default function RootLayout(){
           sheetGrabberVisible: true,
         }}
       />
+      <Stack.Screen
+        name="place/edit/[id]"
+        options={{
+          presentation: 'formSheet',
+          sheetAllowedDetents: [1],
+          sheetGrabberVisible: true,
+        }}
+      />
     </Stack>
     );
 }
