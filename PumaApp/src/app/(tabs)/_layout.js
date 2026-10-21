@@ -1,8 +1,13 @@
 import {NativeTabs} from 'expo-router/unstable-native-tabs';
+//För att kuna dölja navbaren
+import { useSegments } from 'expo-router';
+import { COLORS } from '../../constants/colors';
 
 export default function TabLayout(){
+    const segments = useSegments();
+    const inCamera = segments.includes('camera');
     return (
-        <NativeTabs>
+        <NativeTabs hidden={inCamera} tintColor={COLORS.green}>
             <NativeTabs.Trigger name="map">
                 <NativeTabs.Trigger.Icon sf ="map"/>
                 <NativeTabs.Trigger.Label>Karta</NativeTabs.Trigger.Label>

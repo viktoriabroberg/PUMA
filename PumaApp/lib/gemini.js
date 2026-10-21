@@ -13,7 +13,7 @@ Give at most 3 suggestions. If the photo does not show a mushroom or a berry, se
 Never state that anything is safe to eat.
 Write all text values in Swedish, except scientificName. Keep the JSON keys and the confidence values in English.`;
 
-export async function identify(source)
+export async function identify(source, onImageSelected)
 {
 	const options = { base64: true, quality: 0.4, mediaTypes: ["images"] };
 	let result;
@@ -36,6 +36,8 @@ export async function identify(source)
 	{
 		return null;
 	}
+
+	onImageSelected?.();
 
 	const response = await fetch(API_URL, {
 		method: "POST",

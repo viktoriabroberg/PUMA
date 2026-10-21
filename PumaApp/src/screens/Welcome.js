@@ -27,15 +27,15 @@ export default function Welcome()
 			<View style={styles.buttons}>
 				<Pressable
 					onPress={() => router.push("/login")}
-					style={({ pressed }) => [styles.button, styles.buttonWhite, pressed && styles.buttonPressed]}
+					style={({ pressed }) => [styles.button, styles.buttonGreen, pressed && styles.buttonPressed]}
 				>
-					<Text style={[styles.buttonText, styles.buttonTextWhite]}>Logga in</Text>
+					<Text style={[styles.buttonText, styles.buttonTextGreen]}>Logga in</Text>
 				</Pressable>
 				<Pressable
 					onPress={() => router.push("/register")}
-					style={({ pressed }) => [styles.button, styles.buttonBrown, pressed && styles.buttonPressed]}
+					style={({ pressed }) => [styles.button, styles.buttonWhite, pressed && styles.buttonPressed]}
 				>
-					<Text style={[styles.buttonText, styles.buttonTextBrown]}>Registrera dig</Text>
+					<Text style={[styles.buttonText, styles.buttonTextWhite]}>Registrera dig</Text>
 				</Pressable>
 			</View>
 
@@ -60,12 +60,12 @@ const styles = StyleSheet.create({
 	buttons: { gap: 22, marginTop: 44 },
 	button: { height: 52, borderRadius: 16, justifyContent: "center", alignItems: "center" },
 	buttonWhite: { backgroundColor: COLORS.card },
-	buttonBrown: { backgroundColor: COLORS.brown },
+	buttonGreen: { backgroundColor: COLORS.green },
 	buttonPressed: { opacity: 0.7 },
 	buttonText: { fontSize: 19 },
 	buttonTextWhite: { color: COLORS.label },
-	buttonTextBrown: { color: "white" },
+	buttonTextGreen: { color: "white" },
 
 	terms: { fontSize: 13, fontStyle: "italic", color: "#3C3C43", textAlign: "center", marginTop: 48, marginBottom: 24 },
-	termsLink: { fontWeight: "600", color: COLORS.brown },
+	termsLink: { fontWeight: "600", color: COLORS.green },
 });

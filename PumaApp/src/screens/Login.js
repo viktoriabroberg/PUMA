@@ -58,7 +58,7 @@ export default function Login()
 								style={styles.input}
 								value={email}
 								onChangeText={setEmail}
-								placeholder="Email"
+								placeholder="E-postadress"
 								placeholderTextColor={COLORS.placeholder}
 								autoCapitalize="none"
 								autoCorrect={false}
@@ -72,7 +72,7 @@ export default function Login()
 								style={styles.input}
 								value={password}
 								onChangeText={setPassword}
-								placeholder="Password"
+								placeholder="Lösenord"
 								placeholderTextColor={COLORS.placeholder}
 								autoCapitalize="none"
 								autoCorrect={false}
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: COLORS.brown,
+		backgroundColor: COLORS.green,
 		marginTop: 28,
 		marginBottom: 28,
 	},
@@ -218,5 +218,5 @@ const styles = StyleSheet.create({
 	
 
 	footer: { fontSize: 15, color: COLORS.label, textAlign: "center", marginTop: 28 },
-	footerLink: { color: COLORS.brown, textAlign: "center" },
+	footerLink: { color: COLORS.green, textAlign: "center" },
 });
