@@ -3,7 +3,7 @@ import { View, Text, Image, Pressable, FlatList, TextInput, StyleSheet } from 'r
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getMyLocations } from '../services/PlaceService';
-import { DEFAULT_FILTER, filterLocations } from '../services/FilterService';
+import { DEFAULT_FILTER, filterLocations, isFilterActive} from '../services/FilterService';
 import { searchLocations } from '../services/SearchService';
 import FilterMenu from '../components/FilterMenu';
 
@@ -70,6 +70,13 @@ export default function MyPlaces() {
       keyboardShouldPersistTaps="handled"
       keyExtractor={(item) => String(item.location_id)}
       ListHeaderComponent={header}
+
+      ListEmptyComponent={
+        isFilterActive(filter) ? (
+          <Text style={styles.emptyText}>Inga arter matchade filtreringen.</Text>
+        ) : null
+      }
+
       renderItem={({ item }) => (
         <Pressable
           style={styles.card}
@@ -117,6 +124,7 @@ export default function MyPlaces() {
 const styles = StyleSheet.create({
   list: { flex: 1, backgroundColor: '#f4f4f6' },
   listContent: { paddingTop: 8, paddingHorizontal: 16, paddingBottom: 40 },
+  emptyText: { textAlign: 'center', fontSize: 16, color: '#666', marginTop: 80 },
 
   searchRow: {
     flexDirection: 'row',
