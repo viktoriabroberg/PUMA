@@ -16,8 +16,7 @@ export default function App() {
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync({ quality: 0.7 });
     if (photo?.uri) {
-      // Gå tillbaka till CreatePlace och skicka med bildens uri
-      router.navigate({
+      router.dismissTo({
         pathname: '/map/createPlace',
         params: { photoUri: photo.uri },
       });
