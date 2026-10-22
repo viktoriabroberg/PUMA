@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, Pressable, ActivityIndicator, ScrollView, StyleSheet } from "react-native";
 import { identify } from "../../lib/gemini";
+import { CARD_SHADOW } from "../constants/shadows";
 
 const COLORS = {
 	background: "#f4f4f6",
@@ -170,7 +171,7 @@ export default function IdentifyScreen()
 			{loading && (
 				<View style={[styles.card, styles.spacedCard, styles.loadingCard]}>
 					<ActivityIndicator />
-					<Text style={styles.bodySecondary}>Analyserar bilden…</Text>
+					<Text style={styles.bodySecondary}>{loadingText}</Text>
 				</View>
 			)}
 
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
 		marginLeft: 16,
 	},
 
-	card: { backgroundColor: COLORS.card, borderRadius: 12, padding: 16 },
+	card: { backgroundColor: COLORS.card, borderRadius: 12, padding: 16, boxShadow: CARD_SHADOW },
 	spacedCard: { marginTop: 20 },
 	loadingCard: { flexDirection: "row", alignItems: "center", gap: 12 },
 	cardTitle: { fontSize: 17, fontWeight: "600", color: COLORS.label, marginBottom: 4 },
@@ -224,18 +225,15 @@ const styles = StyleSheet.create({
 	badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
 	badgeText: { fontSize: 13, fontWeight: "600" },
 
-	groupedList: { backgroundColor: COLORS.card, borderRadius: 12, overflow: "hidden" },
-	groupedList: { backgroundColor: COLORS.card, borderRadius: 12, boxShadow: "0px 0px 32px 0px rgba(0, 0, 0, 0.2)" },
+	groupedList: { backgroundColor: COLORS.card, borderRadius: 12, boxShadow: CARD_SHADOW },
 	row: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 16, gap: 12 },
 	rowSeparator: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.separator },
 	rowText: { flex: 1 },
 	rowTitle: { fontSize: 17, color: COLORS.label },
 	rowSubtitle: { fontSize: 13, fontStyle: "italic", color: COLORS.secondaryLabel, marginTop: 2 },
-	card: { backgroundColor: COLORS.card, borderRadius: 12, padding: 16, boxShadow: "0px 0px 32px 0px rgba(0, 0, 0, 0.2)" },
 
-	warningCard: { backgroundColor: "#FF3B301A", borderRadius: 12, padding: 16, gap: 4 },
+	warningCard: { backgroundColor: "#FF3B301A", borderRadius: 12, padding: 16, gap: 4, boxShadow: CARD_SHADOW },
 	warningText: { fontSize: 15, color: "#D70015" },
-	warningCard: { backgroundColor: "#FF3B301A", borderRadius: 12, padding: 16, gap: 4, boxShadow: "0px 0px 32px 0px rgba(0, 0, 0, 0.2)" },
 
 	footnote: { fontSize: 13, color: COLORS.secondaryLabel, lineHeight: 18, marginTop: 24, marginHorizontal: 16 },
 });

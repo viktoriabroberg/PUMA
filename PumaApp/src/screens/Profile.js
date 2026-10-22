@@ -6,6 +6,7 @@ import { getMyLocations } from '../services/PlaceService';
 import MonthlyPlacesChart, { countPlacesPerMonth } from '../components/MonthlyPlacesChart';
 import { logOutUser } from '../services/logOutService';
 import { COLORS } from '../constants/colors';
+import { CARD_SHADOW } from '../constants/shadows';
 
 export default function Profile() {
   const router = useRouter();
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
   email: { fontSize: 15, color: COLORS.secondaryLabel, marginLeft: 4 },
   stats: { marginTop: 28, gap: 20 },
   // Samma kort och skugga som i Identify.js
-  card: { backgroundColor: COLORS.card, borderRadius: 12, padding: 16, boxShadow: '0px 0px 32px 0px rgba(0, 0, 0, 0.2)' },
+  card: { backgroundColor: COLORS.card, borderRadius: 12, padding: 16, boxShadow: CARD_SHADOW },
   statNumber: { fontSize: 34, fontWeight: '700', color: COLORS.label },
   statLabel: { fontSize: 15, color: COLORS.secondaryLabel },
   chartTitle: { fontSize: 17, fontWeight: '600', color: COLORS.label, marginBottom: 4 },
