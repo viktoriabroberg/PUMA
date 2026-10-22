@@ -22,7 +22,8 @@
     "react-native": "0.86.3",
     "react-native-maps": "1.27.2",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0"
+    "react-native-screens": "~4.26.0",
+    "supercluster": "^9.1.0"
   },
   "scripts": {
     "start": "expo start",
@@ -33,7 +34,9 @@
   "private": true,
   "expo": {
     "install": {
-      "exclude": ["@expo/ui"]
+      "exclude": [
+        "@expo/ui"
+      ]
     }
   },
   "devDependencies": {

@@ -132,5 +132,13 @@ export const matchesFilter = (location, filter = DEFAULT_FILTER) => {
   return hasAllSpecies && hasAllCategories;
 };
 
+// Har platsen minst en art av kategorin (t.ex. 'svamp' eller 'bar')?
+export const hasCategory = (location, categoryKey) => {
+  const type = normalize(getCategory(categoryKey)?.type);
+  return (location.location_species ?? []).some(
+    (item) => normalize(item.Species?.type) === type
+  );
+};
+
 export const filterLocations = (locations, filter = DEFAULT_FILTER) =>
   (locations ?? []).filter((location) => matchesFilter(location, filter));

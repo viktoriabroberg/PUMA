@@ -2,10 +2,10 @@ import { useEffect, useState , useRef, useCallback} from 'react';
 import { Image as RNImage, Text as RNText, Pressable, View, useWindowDimensions  } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Host, Button, Form, TextField, HStack, Section, useNativeState, VStack, Text, RNHostView, Spacer, Divider } from '@expo/ui/swift-ui';
+import { Host, Form, TextField, Section, useNativeState, VStack, Text, RNHostView, Divider } from '@expo/ui/swift-ui';
 import {
-  buttonStyle, controlSize, submitLabel, textFieldStyle, onSubmit,
-  background, foregroundStyle, shapes, tint, font,
+  submitLabel, textFieldStyle, onSubmit,
+  background, foregroundStyle, shapes, font,
   padding, shadow, lineLimit, headerProminence,
   listRowBackground, listRowInsets,
 } from '@expo/ui/swift-ui/modifiers';
@@ -383,21 +383,25 @@ export default function CreatePlace() {
             />
           </Section>
 
-          <Section modifiers={[listRowBackground('#F2F2F7')]}>
-            <HStack>
-              <Spacer />
-              <Button
-                label="Spara"
-                onPress={save}
-                modifiers={[
-                  buttonStyle('borderedProminent'),
-                  tint(COLORS.green),
-                  controlSize('large'),
-                  font({ size: 17, weight: 'semibold' }),
-                ]}
-              />
-              <Spacer />
-            </HStack>
+          <Section
+            modifiers={[
+              listRowBackground('#F2F2F7'),
+              listRowInsets({ top: 0, bottom: 0, leading: 0, trailing: 0 }),
+            ]}
+          >
+            {/* Samma knapp som på redigera-sidan */}
+            <RNHostView matchContents>
+              <View style={{ width: width - 40, paddingVertical: 4 }}>
+                <Pressable
+                  onPress={save}
+                  disabled={saving}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.saveButton, pressed && { opacity: 0.7 }]}
+                >
+                  <RNText style={styles.saveButtonText}>{saving ? 'Sparar...' : 'Spara'}</RNText>
+                </Pressable>
+              </View>
+            </RNHostView>
           </Section>
         </Form>
       </Host>
@@ -514,6 +518,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 8,
     backgroundColor: '#007AFF',
+  },
+  saveButton: {
+    height: 50,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.green,
+    //Ger samma bredd som Logga ut-knappen på profilsidan
+    marginHorizontal: 16,
+  },
+  saveButtonText: {
+    fontSize: 17,
+    color: '#FFFFFF',
   },
   retakeButtonText: {
     color: '#FFFFFF',

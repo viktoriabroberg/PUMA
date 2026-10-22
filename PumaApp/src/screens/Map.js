@@ -23,12 +23,19 @@ import { getCurrentLocation } from '../services/GpsService';
 import { watchLocation } from '../services/GpsService';
 import { getMyLocations } from '../services/PlaceService';
 import { DEFAULT_FILTER, filterLocations, isFilterActive } from '../services/FilterService';
+import PlaceMarkers from '../components/PlaceMarkers';
 import { searchLocations } from '../services/SearchService';
 import FilterMenu from '../components/FilterMenu';
 import { COLORS } from '../constants/colors';
 
 const BANNER_HEIGHT_RATIO = 0.4;
 const FOCUS_DELTA = 0.01;
+const INITIAL_REGION = {
+  latitude: 63.820556,
+  longitude: 20.303611,
+  latitudeDelta: 0.01,
+  longitudeDelta: 0.01,
+};
 
 export default function Map() {
   const router = useRouter();
@@ -41,6 +48,8 @@ export default function Map() {
   const [filter, setFilter] = useState(DEFAULT_FILTER);
   const [search, setSearch] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  // Synligt kartområde, används för att slå ihop pins som ligger nära varandra
+  const [region, setRegion] = useState(INITIAL_REGION);
 
   // Hämta användarens platser varje gång skärmen visas,
   useFocusEffect(
@@ -131,13 +140,9 @@ export default function Map() {
         style={StyleSheet.absoluteFill}
         onPress={Keyboard.dismiss}
         onMapReady={() => setMapReady(true)}
+        onRegionChangeComplete={setRegion}
         //Kartan utgår från dessa innan användaren godkänner platsinfo
-        initialRegion={{
-          latitude: 63.820556,
-          longitude: 20.303611,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
+        initialRegion={INITIAL_REGION}
       >
         {location && (
           // Visa endast användarens prick om location finns
@@ -155,18 +160,12 @@ export default function Map() {
           </Marker>
         )}
 
-        {visiblePlaces.map((place) => (
-            <Marker
-              key={place.location_id}
-              coordinate={{
-                latitude: Number(place.latitude),
-                longitude: Number(place.longitude),
-              }}
-              title={place.name}
-              pinColor="green"
-              onPress={() => router.push(`/place/${place.location_id}`)}
-            />
-          ))}
+        <PlaceMarkers
+          places={visiblePlaces}
+          region={region}
+          mapRef={mapRef}
+          onPressPlace={(place) => router.push(`/place/${place.location_id}`)}
+        />
       </MapView>
 
       {/* Under filterknappen. Ligger före topBar så att sökförslagen hamnar ovanpå */}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView from 'react-native-maps';
+import PlaceMarkers from '../components/PlaceMarkers';
 import { Stack, router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
 
@@ -8,6 +9,9 @@ export default function MapMiddleView() {
   const { id } = useLocalSearchParams();
   const [places, setPlaces] = useState(null); // null = laddar
   const hasOpenedSheet = useRef(false);
+  const mapRef = useRef(null);
+  // Synligt kartområde, null tills användaren flyttat kartan
+  const [region, setRegion] = useState(null);
 
   //Hämtas vid fokus så att en borttagen plats försvinner från kartan direkt
   useFocusEffect(
@@ -56,18 +60,18 @@ export default function MapMiddleView() {
           <ActivityIndicator />
         </View>
       ) : (
-        <MapView style={StyleSheet.absoluteFill} initialRegion={initialRegion}>
-          {validPlaces.map((place) => (
-            <Marker
-              key={place.location_id}
-              coordinate={{
-                latitude: Number(place.latitude),
-                longitude: Number(place.longitude),
-              }}
-              pinColor="green"
-              onPress={() => router.push(`/place/${place.location_id}`)}
-            />
-          ))}
+        <MapView
+          ref={mapRef}
+          style={StyleSheet.absoluteFill}
+          initialRegion={initialRegion}
+          onRegionChangeComplete={setRegion}
+        >
+          <PlaceMarkers
+            places={validPlaces}
+            region={region ?? initialRegion}
+            mapRef={mapRef}
+            onPressPlace={(place) => router.push(`/place/${place.location_id}`)}
+          />
         </MapView>
       )}
     </View>
