@@ -57,8 +57,10 @@ export default function FilterMenu({ value = DEFAULT_FILTER, onChange, species, 
 
         <Section>
           {CATEGORIES.map((category) => (
+            // Antalet arter i nyckeln gör att undermenyn byggs om när arterna har hämtats.
+            // Annars kan SwiftUI visa en tom undermeny, t.ex. inne i listhuvudet i MyPlaces.
             <Menu
-              key={category.key}
+              key={`${category.key}-${groups[category.key].length}`}
               label={category.label}
               systemImage={hasSelectionIn(category) ? 'checkmark' : undefined}
             >

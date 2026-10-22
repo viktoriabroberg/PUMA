@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   infoRow: { flexDirection: 'row', marginTop: 24 },
   infoColumn: { flex: 1, paddingHorizontal: 10 },
   infoColumnDivider: { borderLeftWidth: 1, borderLeftColor: '#ddd' },
-  infoColumnMiddle: { flex: 0, width: 80 },
+  infoColumnMiddle: { flex: 0, width: 100 },
   infoLabel: { fontSize: 13, fontFamily: 'SF Pro', color: '#666', marginBottom: 8 },
   infoValue: { fontSize: 15, fontFamily: 'SF Pro', color: '#000' },
 
