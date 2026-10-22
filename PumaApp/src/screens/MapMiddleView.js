@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { getMyLocations } from '../services/PlaceService'; // byt till denna när inloggningen fungerar
 
 export default function MapMiddleView() {
@@ -9,14 +9,17 @@ export default function MapMiddleView() {
   const [places, setPlaces] = useState(null); // null = laddar
   const hasOpenedSheet = useRef(false);
 
-  useEffect(() => {
-    getMyLocations()
-      .then(setPlaces)
-      .catch((err) => {
-        console.log(err);
-        setPlaces([]);
-      });
-  }, []);
+  //Hämtas vid fokus så att en borttagen plats försvinner från kartan direkt
+  useFocusEffect(
+    useCallback(() => {
+      getMyLocations()
+        .then(setPlaces)
+        .catch((err) => {
+          console.log(err);
+          setPlaces([]);
+        });
+    }, [])
+  );
 
   // Öppna PlaceBanner för den valda platsen en enda gång när skärmen visas
   useEffect(() => {

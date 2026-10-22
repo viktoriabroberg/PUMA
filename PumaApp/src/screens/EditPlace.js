@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Image as RNImage, Text as RNText, Pressable, View, useWindowDimensions, ActivityIndicator, StyleSheet } from 'react-native';
+import { Image as RNImage, Text as RNText, Pressable, View, useWindowDimensions, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Host, Form, TextField, Section, useNativeState, VStack, Text, RNHostView, Divider } from '@expo/ui/swift-ui';
@@ -10,7 +10,7 @@ import {
   listRowBackground, listRowInsets,
 } from '@expo/ui/swift-ui/modifiers';
 import { getSpecies, addSpeciesFunction, getCurrentProfileId, uploadPicture } from '../services/CreatePlaceService';
-import { getLocationById, updateLocation, updateLocationSpecies } from '../services/PlaceService';
+import { getLocationById, updateLocation, updateLocationSpecies, deleteLocation } from '../services/PlaceService';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 
@@ -60,6 +60,7 @@ export default function EditPlace() {
   //Förhindrar att platsen sparas flera gånger vid snabba tryck
   const isSavingRef = useRef(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const mushrooms = speciesList.filter((s) => s.type === 'Svamp');
   const berries = speciesList.filter((s) => s.type === 'Bär');
@@ -190,6 +191,31 @@ export default function EditPlace() {
       //Låt användaren försöka igen om det blev fel
       isSavingRef.current = false;
       setSaving(false);
+    }
+  }
+
+  //Frågar först, eftersom borttagningen inte går att ångra
+  function confirmDelete() {
+    if (isSavingRef.current) return;
+    Alert.alert('Ta bort plats?', 'Platsen tas bort permanent och det går inte att ångra.', [
+      { text: 'Avbryt', style: 'cancel' },
+      { text: 'Ta bort', style: 'destructive', onPress: removePlace },
+    ]);
+  }
+
+  async function removePlace() {
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
+    setDeleting(true);
+
+    try {
+      await deleteLocation(place.location_id);
+      //Stäng både redigeringen och PlaceBanner, platsen finns inte längre
+      router.dismiss(2);
+    } catch (e) {
+      alert(e.message);
+      isSavingRef.current = false;
+      setDeleting(false);
     }
   }
 
@@ -410,7 +436,7 @@ export default function EditPlace() {
           >
             {/* Egen knapp eftersom tint inte slår igenom när vyn visas som modal */}
             <RNHostView matchContents>
-              <View style={{ width: width - 40, alignItems: 'center', paddingVertical: 4 }}>
+              <View style={{ width: width - 40, paddingVertical: 4 }}>
                 <Pressable
                   onPress={save}
                   disabled={saving}
@@ -418,6 +444,16 @@ export default function EditPlace() {
                   style={({ pressed }) => [styles.saveButton, pressed && { opacity: 0.7 }]}
                 >
                   <RNText style={styles.saveButtonText}>{saving ? 'Sparar...' : 'Spara'}</RNText>
+                </Pressable>
+                {/* Ta bort ligger sist, långt från Stäng så att den inte trycks av misstag */}
+                <Pressable
+                  onPress={confirmDelete}
+                  disabled={saving || deleting}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.deleteButton, pressed && { opacity: 0.6 }]}
+                >
+                  <Ionicons name="trash-outline" size={18} color={COLORS.red} />
+                  <RNText style={styles.deleteButtonText}>{deleting ? 'Tar bort...' : 'Ta bort plats'}</RNText>
                 </Pressable>
               </View>
             </RNHostView>
@@ -535,15 +571,31 @@ const styles = StyleSheet.create({
   amountLabelSelected: {
     color: '#FFFFFF',
   },
+  //Samma stil som Logga ut-knappen i Profile.js
   saveButton: {
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 30,
+    height: 50,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: COLORS.green,
+    //Ger samma bredd som Logga ut-knappen på profilsidan
+    marginHorizontal: 16,
   },
   saveButtonText: {
     fontSize: 17,
-    fontWeight: '600',
     color: '#FFFFFF',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    marginTop: 25,
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  deleteButtonText: {
+    fontSize: 17,
+    color: COLORS.red,
   },
 });

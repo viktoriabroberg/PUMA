@@ -152,3 +152,30 @@ export const updateLocationSpecies = async (locationId, speciesIds) => {
     }
   }
 };
+
+// Tar bort en plats och dess kopplade arter
+export const deleteLocation = async (locationId) => {
+  // Arterna kopplade till platsen måste tas bort först
+  const { error: speciesError } = await supabase
+    .from('location_species')
+    .delete()
+    .eq('location_id', locationId);
+
+  if (speciesError) {
+    throw speciesError;
+  }
+
+  const { data, error } = await supabase
+    .from('location')
+    .delete()
+    .eq('location_id', locationId)
+    .select();
+
+  if (error) {
+    throw error;
+  }
+  // RLS kan stoppa borttagningen utan att ge något fel
+  if (!data || data.length === 0) {
+    throw new Error('Platsen kunde inte tas bort (saknas DELETE-policy i Supabase?)');
+  }
+};

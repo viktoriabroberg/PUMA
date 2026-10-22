@@ -9,5 +9,6 @@ export const COLORS = {
 	darkBrown: "#6C584C",
 	blue: "#007AFF",
 	green: "#0E7C1C",
+	red: "#FF3B30",
 	closeButton: "#E9E9EB",
 };
