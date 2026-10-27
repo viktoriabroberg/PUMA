@@ -33,9 +33,9 @@ export default function Welcome()
 				</Pressable>
 				<Pressable
 					onPress={() => router.push("/register")}
-					style={({ pressed }) => [styles.button, styles.buttonGreen, pressed && styles.buttonPressed]}
+					style={({ pressed }) => [styles.button, styles.buttonWhite, pressed && styles.buttonPressed]}
 				>
-					<Text style={[styles.buttonText, styles.buttonTextGreen]}>Registrera dig</Text>
+					<Text style={[styles.buttonText, styles.buttonTextWhite]}>Registrera dig</Text>
 				</Pressable>
 			</View>
 
@@ -59,9 +59,11 @@ const styles = StyleSheet.create({
 
 	buttons: { gap: 22, marginTop: 44 },
 	button: { height: 52, borderRadius: 16, justifyContent: "center", alignItems: "center" },
+	buttonWhite: { backgroundColor: COLORS.card },
 	buttonGreen: { backgroundColor: COLORS.green },
 	buttonPressed: { opacity: 0.7 },
 	buttonText: { fontSize: 19 },
+	buttonTextWhite: { color: COLORS.label },
 	buttonTextGreen: { color: "white" },
 
 	terms: { fontSize: 13, fontStyle: "italic", color: "#3C3C43", textAlign: "center", marginTop: 48, marginBottom: 24 },
